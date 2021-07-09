@@ -1,0 +1,33 @@
+{
+  "name": "@rybr/redux",
+  "version": "1.0.0",
+  "description": "Simple implementation of redux for use with React and JS",
+  "main": "redux.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --config webpack.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RMBraun/redux.git"
+  },
+  "keywords": [
+    "redux",
+    "react"
+  ],
+  "author": "Ryan Braun",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/RMBraun/redux/issues"
+  },
+  "homepage": "https://github.com/RMBraun/redux#readme",
+  "devDependencies": {
+    "@babel/core": "^7.13.1",
+    "@babel/plugin-transform-arrow-functions": "^7.13.0",
+    "@babel/preset-env": "^7.13.5",
+    "babel-loader": "^8.2.2",
+    "glob": "^7.1.6",
+    "webpack": "^5.24.1",
+    "webpack-cli": "^4.5.0"
+  }
+}

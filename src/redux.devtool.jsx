@@ -1,13 +1,28 @@
 import Redux from 'redux'
 import React from 'react'
 import ReactDOM from 'react-dom'
+import './jsondiffpatch.html.css'
 
 import styled from '@emotion/styled'
 
-import { get, defaults } from 'lenses'
-import { PlainButton } from '../modules/reusable'
+import { get, defaults } from '@rybr/lenses/get'
 
 const data = document.currentScript.dataset
+
+const PlainButton = styled.button`
+  position: relative;
+  margin: 0;
+  padding: 0;
+  outline: none;
+  border: none;
+  border-radius: 0px;
+  background: transparent;
+  color: #000;
+  font-size: 0.8125rem;
+  line-height: 1.85;
+  letter-spacing: 2.6px;
+  font-family: AzoSansRegular;
+`
 
 const Panel = styled.div`
   background: #333333;
@@ -74,7 +89,7 @@ const ActionListTable = styled.table`
 const TableHeader = styled.th`
   position: sticky;
   height: 40px;
-  ${(props) => (props.isShown ? null : 'display: none;')}
+  ${props => (props.isShown ? null : 'display: none;')}
   top: 0;
   font-size: 18px;
   white-space: nowrap;
@@ -86,8 +101,8 @@ const TableHeader = styled.th`
 `
 
 const TableRow = styled.tr`
-  ${(props) => (props.isShown ? null : 'display: none;')}
-  ${(props) => (props.isSelected ? 'background-color: rgba(255, 255, 255, 0.2);' : null)}
+  ${props => (props.isShown ? null : 'display: none;')}
+  ${props => (props.isSelected ? 'background-color: rgba(255, 255, 255, 0.2);' : null)}
 
   :hover {
     background-color: rgba(255, 255, 255, 0.2);
@@ -95,7 +110,7 @@ const TableRow = styled.tr`
 `
 
 const TableData = styled.td`
-  ${(props) => (props.isShown ? null : 'display: none;')}
+  ${props => (props.isShown ? null : 'display: none;')}
   white-space: nowrap;
   max-width: 200px;
   overflow-x: scroll;
@@ -136,7 +151,7 @@ const TabSelector = styled(PlainButton)`
   flex: 1 0 auto;
   height: 100%;
   color: white;
-  background: ${(props) => (props.isSelected ? '#444' : '#333')};
+  background: ${props => (props.isSelected ? '#444' : '#333')};
   border: 1px solid rgb(144, 144, 144);
   font-size: 16px;
 
@@ -155,10 +170,10 @@ const Tabs = styled.div`
 
 const Tab = styled.div`
   width: 100%;
-  ${(props) => (!props.isSelected ? 'display: none;' : null)}
+  ${props => (!props.isSelected ? 'display: none;' : null)}
 `
 
-const createTabs = (tabsData) => {
+const createTabs = tabsData => {
   const [selectedTabIndex, setSelectedTabIndex] = React.useState(0)
 
   const { selectors, contents } = tabsData.reduce(
@@ -229,7 +244,7 @@ const ReduxDevTool = () => {
   React.useEffect(() => {
     let actionListener = actionListener
     if (actionListener == null) {
-      actionListener = (newActionLog) => {
+      actionListener = newActionLog => {
         setActionLogs(newActionLog.slice(0))
       }
 

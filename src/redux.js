@@ -1,9 +1,10 @@
-import { clone } from './utils'
+import { clone } from '../utils'
 
 const TYPES = {
   EPIC: 'Epic',
   ACTION: 'Action',
 }
+
 export default class Redux {
   constructor() {
     this.enableDebug = false
@@ -35,7 +36,7 @@ export default class Redux {
   }
 
   static initChangeListener(pickerFunc) {
-    const propSelectFunction = (newStore) => (pickerFunc || ((a) => a))(newStore) || {}
+    const propSelectFunction = newStore => (pickerFunc || (a => a))(newStore) || {}
     const getInitialState = () => propSelectFunction(clone(Redux.getInstance().store))
 
     return {
@@ -71,7 +72,7 @@ export default class Redux {
         }
       })
 
-      Redux.getInstance().actionListeners.push((info) => {
+      Redux.getInstance().actionListeners.push(info => {
         const listenerForId = changeListener[info.id]
         if (listenerForId && listenerForId.constructor && listenerForId.constructor.name === Function.name) {
           listenerForId(info)
@@ -99,7 +100,7 @@ export default class Redux {
         }
       })
 
-      Redux.getInstance().actionListeners.push((info) => {
+      Redux.getInstance().actionListeners.push(info => {
         changeListener.filter(({ ids }) => ids.includes(info.id)).forEach(({ callback }) => callback(info))
       })
     } else {
@@ -118,7 +119,7 @@ export default class Redux {
   static updateState(newStore = {}) {
     Object.assign(Redux.getInstance().store, newStore)
 
-    Redux.getInstance().listeners.forEach((listener) => {
+    Redux.getInstance().listeners.forEach(listener => {
       if (typeof listener === 'function') {
         listener(newStore)
       }
@@ -132,13 +133,13 @@ export default class Redux {
 
     const actionId = func.name || actionName
 
-    const action = (payload) => {
+    const action = payload => {
       //get new store
       //important to send a clone to prevent any possible data mutations
       const newStore = func(clone(Redux.getInstance().store), payload)
 
       //send new action log to listeners
-      Redux.getInstance().actionListeners.forEach((actionListener) => {
+      Redux.getInstance().actionListeners.forEach(actionListener => {
         if (typeof actionListener === 'function') {
           actionListener({
             id: actionId,
@@ -187,9 +188,9 @@ export default class Redux {
 
     const epicId = func.name || actionName
 
-    const epic = (payload) => {
+    const epic = payload => {
       //send new action log to listeners
-      Redux.getInstance().actionListeners.forEach((actionListener) => {
+      Redux.getInstance().actionListeners.forEach(actionListener => {
         if (typeof actionListener === 'function') {
           actionListener({
             id: epicId,
@@ -255,7 +256,7 @@ if (typeof window !== 'undefined') {
       const reduxActions = allActions && allActions[reduxId]
       const action = reduxActions && reduxActions[actionId]
 
-      if(typeof action === 'function') {
+      if (typeof action === 'function') {
         action(payload)
       }
     },
@@ -264,9 +265,9 @@ if (typeof window !== 'undefined') {
       const reduxEpics = allEpics && allEpics[reduxId]
       const epic = reduxEpics && reduxEpics[epicId]
 
-      if(typeof epic === 'function') {
+      if (typeof epic === 'function') {
         epic(payload)
       }
-    }
+    },
   }
 }

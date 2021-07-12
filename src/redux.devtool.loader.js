@@ -1,6 +1,7 @@
 import Redux from 'redux'
+import jsondiffpatch from 'jsondiffpatch'
 
-import { get } from 'lenses'
+import { get } from '@rybr/lenses/get'
 
 //script data
 const data = document.currentScript.dataset
@@ -67,7 +68,7 @@ const ReduxDevTool = (function () {
       //global injection points
       devToolWindow.React = window.React
       devToolWindow.ReactDOM = window.ReactDOM
-      devToolWindow.jsondiffpatch = window.jsondiffpatch
+      devToolWindow.jsondiffpatch = jsondiffpatch
       devToolWindow.Redux = window.Redux
       devToolWindow.L = window.L
 
@@ -86,7 +87,6 @@ const ReduxDevTool = (function () {
               <html>
                   <head>
                       <title>Redux Dev Tool</title>
-                      <link rel="stylesheet" href="${data.diffCss}">
                       <style>
                         html {
                           font-family: monospace;

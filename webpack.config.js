@@ -4,20 +4,19 @@ const glob = require('glob')
 const baseConfig = {
   mode: 'production',
   name: 'redux',
-  entry: glob
-    .sync(path.join(__dirname, '*.js'))
-    .filter(source => !source.includes('webpack.config'))
-    .reduce((entries, source) => {
-      entries[path.basename(source).replace('.js', '')] = source
+  entry: [...glob.sync(path.join(__dirname, 'src', '*.js')), ...glob.sync(path.join(__dirname, 'src', '*.jsx'))].reduce(
+    (entries, source) => {
+      entries[path.basename(source).replace('.jsx', '').replace('.js', '')] = source
 
       return entries
-    }, {}),
+    },
+    {}
+  ),
   externals: {
     // Use external version of React
     react: 'React',
     'react-dom': 'ReactDOM',
     redux: 'Redux',
-    lenses: 'L',
   },
   output: {
     filename: '[name].js',
@@ -25,7 +24,7 @@ const baseConfig = {
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /\.jsx?$/,
         exclude: /tests|node_modules/,
         use: {
           loader: 'babel-loader',
@@ -34,6 +33,27 @@ const baseConfig = {
             plugins: ['@babel/plugin-transform-arrow-functions'],
           },
         },
+      },
+      {
+        test: /\.jsx$/,
+        loader: 'babel-loader',
+        options: {
+          presets: [['@babel/preset-env', { modules: false }], '@babel/preset-react'],
+          plugins: [
+            ['@emotion', { autoLabel: 'always' }],
+            '@babel/plugin-proposal-object-rest-spread',
+            '@babel/plugin-syntax-dynamic-import',
+            '@babel/plugin-proposal-class-properties',
+            ['transform-react-remove-prop-types', { removeImport: true }],
+            '@babel/plugin-transform-react-inline-elements',
+            '@babel/plugin-transform-react-constant-elements',
+          ],
+          cacheDirectory: true,
+        },
+      },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
       },
     ],
   },
@@ -57,7 +77,6 @@ const webDev = {
   output: {
     path: path.resolve('dist'),
   },
-  module: {},
 }
 
 module.exports = [webMin, webDev]

@@ -4,7 +4,6 @@ const TYPES = {
   EPIC: 'Epic',
   ACTION: 'Action',
 }
-
 export default class Redux {
   constructor() {
     this.enableDebug = false
@@ -23,8 +22,8 @@ export default class Redux {
     return Redux.instance
   }
 
-  static getActions() {
-    return Redux.getInstance().actions
+  static getActions(reduxId) {
+    return reduxId == null ? Redux.getInstance().actions : Redux.getInstance().actions[reduxId]
   }
 
   static getEpics() {
@@ -61,6 +60,32 @@ export default class Redux {
     }
   }
 
+  /*
+  example usages:
+  import { Actions } from './myRedux'
+
+  //listen for Redux Actions and Epics
+  Redux.addActionListener({
+    [Actions.actionOne]: ({ id, type, time, payload, prevStore, store }) => {
+      console.log(id, payload)
+    }
+  })
+
+  Redux.addActionListener(function ({ id, type, time, payload, prevStore, store }) {
+    if(id === Actions.actionOne.toString()) {
+        console.log(id, payload)
+    }
+  })
+
+  //can bind to multiple actions for a single callback
+  Redux.addActionListener([
+    { ids: [Actions.actionOne, Actions.actionTwo], 
+      callback: ({ id, type, time, payload, prevStore, store }) => {
+        console.log(id, payload)
+      }
+    }
+  ])
+  */
   static addActionListener(changeListener) {
     const type = changeListener && changeListener.constructor && changeListener.constructor.name
     if (type === Function.name) {
@@ -85,7 +110,7 @@ export default class Redux {
         }
 
         if (!Array.isArray(listener.ids)) {
-          throw new Error(`Action listener id list at index ${i} must an array`)
+          throw new Error(`Action listener id list at index ${i} must be an array`)
         }
 
         if (listener.ids.length === 0) {
@@ -100,8 +125,19 @@ export default class Redux {
         }
       })
 
+      //in case they use the Action function directly as the ID rather than the
+      //string ID
+      const formattedChangeListener = changeListener.map(listener => ({
+        ...listener,
+        ids: listener.ids.map(id => id.toString()),
+      }))
+
       Redux.getInstance().actionListeners.push(info => {
-        changeListener.filter(({ ids }) => ids.includes(info.id)).forEach(({ callback }) => callback(info))
+        formattedChangeListener.forEach(({ ids, callback }) => {
+          if (ids.includes(info.id)) {
+            callback(info)
+          }
+        })
       })
     } else {
       throw new Error('Action listener must be of type function, object, or array')
@@ -133,7 +169,7 @@ export default class Redux {
 
     const actionId = func.name || actionName
 
-    const action = payload => {
+    const action = function (payload) {
       //get new store
       //important to send a clone to prevent any possible data mutations
       const newStore = func(clone(Redux.getInstance().store), payload)
@@ -155,6 +191,10 @@ export default class Redux {
       //update current store and notify everyone
       Redux.updateState(newStore)
     }
+
+    //add prototype toString so that it resolves to the actionId
+    action.toString = () => actionId
+    action.prototype.toString = () => actionId
 
     //snapshot action
     Redux.getInstance().actions[reduxId] = Redux.getInstance().actions[reduxId] || {}

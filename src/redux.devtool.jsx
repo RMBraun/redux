@@ -265,7 +265,7 @@ const ReduxDevTool = () => {
               <CheckBox
                 name={name}
                 key={`${key}-configs-${i}`}
-                type='checkbox'
+                type="checkbox"
                 checked={isShown}
                 onChange={() => {
                   setConfig(['columns', key], !isShown)
@@ -282,7 +282,7 @@ const ReduxDevTool = () => {
               <CheckBox
                 name={name}
                 key={`${key}-configs-${i}`}
-                type='checkbox'
+                type="checkbox"
                 checked={isShown}
                 onChange={() => {
                   setConfig(['filters', key], !isShown)

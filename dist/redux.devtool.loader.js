@@ -11,9 +11,7 @@ const getProperty = (property, source) => {
     return source
   }
 
-  return Object.prototype.hasOwnProperty.call(source, property)
-    ? source[property]
-    : undefined
+  return Object.prototype.hasOwnProperty.call(source, property) ? source[property] : undefined
 }
 
 const applyFunction = (func, source, i) => {
@@ -36,6 +34,7 @@ const performOperation = ({ operation, type }, source, i) =>
     : source
 
 //Curried version
+// prettier-ignore
 const _get = (...operationInputs) => (input) => {
   //default return
   if (operationInputs.length === 0) {
@@ -68,7 +67,7 @@ const _get = (...operationInputs) => (input) => {
   )
 }
 
-const defaults = (defaultValue) => (input) => {
+const defaults = defaultValue => input => {
   return input == null ? defaultValue : input
 }
 
@@ -87,10 +86,10 @@ loadGlobal(module.exports)
 /***/ 885:
 /***/ ((module) => {
 
-const getConstructorName = (input) =>
+const getConstructorName = input =>
   input == null ? `${input}` : input.constructor ? input.constructor.name : 'Unknown'
 
-const getOperationType = (operation) =>
+const getOperationType = operation =>
   TYPES.STRING.is(operation) && operation.trim().length > 0
     ? TYPES.STRING
     : TYPES.NUMBER.is(operation) && operation >= 0
@@ -107,22 +106,28 @@ const isType = (input, type, typeofName, constructor) =>
 
 const TYPES = {
   STRING: {
-    is: (input) => isType(input, TYPES.STRING, 'string', String),
+    is: input => isType(input, TYPES.STRING, 'string', String),
+    toString: () => 'STRING',
   },
   FUNCTION: {
-    is: (input) => isType(input, TYPES.FUNCTION, 'function', Function),
+    is: input => isType(input, TYPES.FUNCTION, 'function', Function),
+    toString: () => 'FUNCTION',
   },
   NUMBER: {
-    is: (input) => isType(input, TYPES.NUMBER, 'number', Number),
+    is: input => isType(input, TYPES.NUMBER, 'number', Number),
+    toString: () => 'NUMBER',
   },
   OBJECT: {
-    is: (input) => isType(input, TYPES.OBJECT, 'object', Object),
+    is: input => isType(input, TYPES.OBJECT, 'object', Object),
+    toString: () => 'OBJECT',
   },
   ARRAY: {
-    is: (input) => input === TYPES.ARRAY || Array.isArray(input),
+    is: input => input === TYPES.ARRAY || Array.isArray(input),
+    toString: () => 'ARRAY',
   },
   INVALID: {
-    is: (input) => input === TYPES.INVALID,
+    is: input => input === TYPES.INVALID,
+    toString: () => 'INVALID',
   },
 }
 
@@ -5250,10 +5255,15 @@ var ReduxDevTool = function () {
 
       devToolWindow.document.querySelector('body').innerHTML = ''; //create popup DOM structure
 
-      devToolWindow.document.write("\n              <html>\n                  <head>\n                      <title>Redux Dev Tool</title>\n                      <style>\n                        html {\n                          font-family: monospace;\n                          background: #212121;\n                        }\n\n                        body {\n                          margin: 0px;\n                        }\n\n                        #".concat(injectionPointId, " {\n                          height: 100vh;\n                          width: 100vw;\n                        }\n                      </style>\n                  </head>\n                  <body>\n                      <div id=\"").concat(injectionPointId, "\"></div>\n                      <script src=\"").concat(data.devtoolScript, "\" data-injection-point-id=").concat(injectionPointId, "></script>\n                  </body>\n              </html>\n          ")); //add close function to main page window
+      devToolWindow.document.write("\n              <html>\n                  <head>\n                      <title>Redux Dev Tool</title>\n                      <style>\n                        html {\n                          font-family: monospace;\n                          background: #212121;\n                        }\n\n                        body {\n                          margin: 0px;\n                        }\n\n                        #".concat(injectionPointId, " {\n                          height: 100vh;\n                          width: 100vw;\n                        }\n                      </style>\n                  </head>\n                  <body>\n                      <div id=\"").concat(injectionPointId, "\"></div>\n                      <script src=\"").concat(data.devtoolScript, "\" data-injection-point-id=").concat(injectionPointId, "></script>\n                  </body>\n              </html>\n          ")); //add stop function to main page window
 
       window.stopReduxDevTool = function () {
         setConfig('enablePopup', false);
+        devToolWindow.close();
+      }; //add close function to main page window
+
+
+      window.closeReduxDevTool = function () {
         devToolWindow.close();
       };
     }
@@ -5263,6 +5273,7 @@ var ReduxDevTool = function () {
 external_Redux_default().addActionListener(ReduxDevTool.actionListener);
 window.addEventListener('beforeunload', function () {
   external_Redux_default().removeActionListener(ReduxDevTool.actionListener);
+  window.closeReduxDevTool();
 });
 console.log('Redux dev tool loaded');
 

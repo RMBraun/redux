@@ -34,7 +34,7 @@
     "@emotion/babel-plugin": "^11.1.2",
     "@emotion/react": "11.1.2",
     "@emotion/styled": "^11.0.0",
-    "@rybr/lenses": "1.0.17",
+    "@rybr/lenses": "1.0.21",
     "babel-loader": "^8.2.2",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "css-loader": "^5.2.6",

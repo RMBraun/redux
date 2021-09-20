@@ -80,6 +80,12 @@ var __webpack_exports__ = {};
 /* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_utils__WEBPACK_IMPORTED_MODULE_0__);
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -127,8 +133,8 @@ var Redux = /*#__PURE__*/function () {
     }
   }, {
     key: "getActions",
-    value: function getActions() {
-      return Redux.getInstance().actions;
+    value: function getActions(reduxId) {
+      return reduxId == null ? Redux.getInstance().actions : Redux.getInstance().actions[reduxId];
     }
   }, {
     key: "getEpics",
@@ -178,6 +184,30 @@ var Redux = /*#__PURE__*/function () {
         Redux.getInstance().listeners.splice(index, 1);
       }
     }
+    /*
+    example usages:
+    import { Actions } from './myRedux'
+     //listen for Redux Actions and Epics
+    Redux.addActionListener({
+      [Actions.actionOne]: ({ id, type, time, payload, prevStore, store }) => {
+        console.log(id, payload)
+      }
+    })
+     Redux.addActionListener(function ({ id, type, time, payload, prevStore, store }) {
+      if(id === Actions.actionOne.toString()) {
+          console.log(id, payload)
+      }
+    })
+     //can bind to multiple actions for a single callback
+    Redux.addActionListener([
+      { ids: [Actions.actionOne, Actions.actionTwo], 
+        callback: ({ id, type, time, payload, prevStore, store }) => {
+          console.log(id, payload)
+        }
+      }
+    ])
+    */
+
   }, {
     key: "addActionListener",
     value: function addActionListener(changeListener) {
@@ -209,7 +239,7 @@ var Redux = /*#__PURE__*/function () {
           }
 
           if (!Array.isArray(listener.ids)) {
-            throw new Error("Action listener id list at index ".concat(i, " must an array"));
+            throw new Error("Action listener id list at index ".concat(i, " must be an array"));
           }
 
           if (listener.ids.length === 0) {
@@ -219,14 +249,24 @@ var Redux = /*#__PURE__*/function () {
           if (listener.callback == null || listener.callback.constructor && listener.callback.constructor.name !== Function.name) {
             throw new Error("Action listener callback at index ".concat(i, " must be a function"));
           }
+        }); //in case they use the Action function directly as the ID rather than the
+        //string ID
+
+        var formattedChangeListener = changeListener.map(function (listener) {
+          return _objectSpread(_objectSpread({}, listener), {}, {
+            ids: listener.ids.map(function (id) {
+              return id.toString();
+            })
+          });
         });
         Redux.getInstance().actionListeners.push(function (info) {
-          changeListener.filter(function (_ref3) {
-            var ids = _ref3.ids;
-            return ids.includes(info.id);
-          }).forEach(function (_ref4) {
-            var callback = _ref4.callback;
-            return callback(info);
+          formattedChangeListener.forEach(function (_ref3) {
+            var ids = _ref3.ids,
+                callback = _ref3.callback;
+
+            if (ids.includes(info.id)) {
+              callback(info);
+            }
           });
         });
       } else {
@@ -283,6 +323,15 @@ var Redux = /*#__PURE__*/function () {
         }); //update current store and notify everyone
 
         Redux.updateState(newStore);
+      }; //add prototype toString so that it resolves to the actionId
+
+
+      action.toString = function () {
+        return actionId;
+      };
+
+      action.prototype.toString = function () {
+        return actionId;
       }; //snapshot action
 
 
@@ -303,10 +352,10 @@ var Redux = /*#__PURE__*/function () {
         throw new Error("You must specify a non-null reduxId when creating redux actions");
       }
 
-      return Object.fromEntries(Object.entries(actions || {}).map(function (_ref5) {
-        var _ref6 = _slicedToArray(_ref5, 2),
-            actionName = _ref6[0],
-            func = _ref6[1];
+      return Object.fromEntries(Object.entries(actions || {}).map(function (_ref4) {
+        var _ref5 = _slicedToArray(_ref4, 2),
+            actionName = _ref5[0],
+            func = _ref5[1];
 
         return [actionName, Redux.createAction(reduxId, func, actionName)];
       }));
@@ -357,10 +406,10 @@ var Redux = /*#__PURE__*/function () {
         throw new Error("You must specify a non-null reduxId when creating redux epics");
       }
 
-      return Object.fromEntries(Object.entries(actions || {}).map(function (_ref7) {
-        var _ref8 = _slicedToArray(_ref7, 2),
-            actionName = _ref8[0],
-            func = _ref8[1];
+      return Object.fromEntries(Object.entries(actions || {}).map(function (_ref6) {
+        var _ref7 = _slicedToArray(_ref6, 2),
+            actionName = _ref7[0],
+            func = _ref7[1];
 
         return [actionName, Redux.createEpic(reduxId, func, actionName)];
       }));

@@ -10,7 +10,7 @@ export default function listen(pickerFunc, Component) {
     React.useEffect(() => {
       let propListener = propListener
       if (propListener == null) {
-        propListener = (newStore) => {
+        propListener = newStore => {
           setState(propSelectFunction(newStore))
         }
 

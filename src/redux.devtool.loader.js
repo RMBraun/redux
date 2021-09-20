@@ -110,9 +110,14 @@ const ReduxDevTool = (function () {
               </html>
           `)
 
-      //add close function to main page window
+      //add stop function to main page window
       window.stopReduxDevTool = () => {
         setConfig('enablePopup', false)
+        devToolWindow.close()
+      }
+
+      //add close function to main page window
+      window.closeReduxDevTool = () => {
         devToolWindow.close()
       }
     },
@@ -122,6 +127,7 @@ const ReduxDevTool = (function () {
 Redux.addActionListener(ReduxDevTool.actionListener)
 window.addEventListener('beforeunload', function () {
   Redux.removeActionListener(ReduxDevTool.actionListener)
+  window.closeReduxDevTool()
 })
 
 console.log('Redux dev tool loaded')

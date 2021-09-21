@@ -66,7 +66,7 @@ const MainContainer = styled.div`
   position: relative;
   display: flex;
   flex-direction: row;
-  height: calc(100% - 40px);
+  height: calc(100% - 85px);
 `
 
 const ActionList = styled(Panel)`
@@ -224,21 +224,35 @@ const getColumns = () => [
   createColumn('Time (s)', 'time'),
 ]
 
-const getFilters = () =>
+const getTypeFilters = () =>
   Object.entries(Redux.TYPES).reduce((acc, [key, value]) => {
     acc[value] = {
       name: value,
       key: value,
-      isShown: get(window.getDevToolConfigs(), 'filters', value, defaults(true)),
+      isShown: get(window.getDevToolConfigs(), 'typeFilters', value, defaults(true)),
     }
     return acc
   }, {})
 
+const getStoreFilters = actionLog =>
+  (actionLog || []).reduce((acc, { storeId }) => {
+    acc[storeId] = acc[storeId] || {
+      name: storeId,
+      key: storeId,
+      isShown: get(window.getDevToolConfigs(), 'storeFilters', storeId, defaults(true)),
+    }
+
+    return acc
+  }, {})
+
+const actionLogSnapshot = window.getActionLog().slice(0)
+
 const ReduxDevTool = () => {
-  const [filters, setFilters] = React.useState(getFilters())
+  const [storeFilters, setStoreFilters] = React.useState(getStoreFilters(actionLogSnapshot))
+  const [typeFilters, setTypeFilters] = React.useState(getTypeFilters())
   const [columns, setColumns] = React.useState(getColumns())
   const [selectedIndex, setSelectedIndex] = React.useState(-1)
-  const [actionLogs, setActionLogs] = React.useState(window.getActionLog().slice(0))
+  const [actionLogs, setActionLogs] = React.useState(actionLogSnapshot)
   const [actionDiffHtml, setActionDiffHtml] = React.useState('')
   const [payload, setPayload] = React.useState('')
 
@@ -246,7 +260,10 @@ const ReduxDevTool = () => {
     let actionListener = actionListener
     if (actionListener == null) {
       actionListener = newActionLog => {
-        setActionLogs(newActionLog.slice(0))
+        const newActionLogSnapshot = newActionLog.slice(0)
+
+        setActionLogs(newActionLogSnapshot)
+        setStoreFilters(getStoreFilters(newActionLogSnapshot))
       }
 
       window.setSubscriber(actionListener)
@@ -278,7 +295,7 @@ const ReduxDevTool = () => {
           ))}
         </ColumnToggles>
         <Filters>
-          {Object.values(filters).map(({ name, key, isShown }, i) => (
+          {Object.values(typeFilters).map(({ name, key, isShown }, i) => (
             <CheckBoxLabel htmlFor={name}>
               <CheckBox
                 name={name}
@@ -286,14 +303,33 @@ const ReduxDevTool = () => {
                 type="checkbox"
                 checked={isShown}
                 onChange={() => {
-                  setConfig(['filters', key], !isShown)
-                  setFilters(getFilters())
+                  setConfig(['typeFilters', key], !isShown)
+                  setTypeFilters(getTypeFilters())
                 }}
               />
               {name}
             </CheckBoxLabel>
           ))}
         </Filters>
+      </Toolbar>
+      <Toolbar>
+        <ColumnToggles>
+          {Object.values(storeFilters).map(({ name, key, isShown }, i) => (
+            <CheckBoxLabel htmlFor={name}>
+              <CheckBox
+                name={name}
+                key={`${key}-configs-${i}`}
+                type="checkbox"
+                checked={isShown}
+                onChange={() => {
+                  setConfig(['storeFilters', key], !isShown)
+                  setStoreFilters(getStoreFilters(actionLogs))
+                }}
+              />
+              {name}
+            </CheckBoxLabel>
+          ))}
+        </ColumnToggles>
       </Toolbar>
       <MainContainer>
         <ActionList>
@@ -318,7 +354,7 @@ const ReduxDevTool = () => {
                     setSelectedIndex(index)
                   }}
                   isSelected={index === selectedIndex}
-                  isShown={get(filters, rowData.type, 'isShown')}
+                  isShown={get(typeFilters, rowData.type, 'isShown') && get(storeFilters, rowData.storeId, 'isShown')}
                 >
                   {columns.map(({ key, isShown }, i) => (
                     <TableData isShown={isShown} key={`${key}-${i}`}>

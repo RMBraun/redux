@@ -13,7 +13,7 @@ DevToolConfigs.filters = DevToolConfigs.filters || {}
 localStorage.setItem(localStorageConfigId, JSON.stringify(DevToolConfigs))
 
 const setConfig = (keys, value) => {
-  set(DevToolConfigs, ...keys, value)
+  set(DevToolConfigs, ...[].concat(keys), value)
   localStorage.setItem(localStorageConfigId, JSON.stringify(DevToolConfigs))
 }
 

@@ -252,7 +252,7 @@ DevToolConfigs.filters = DevToolConfigs.filters || {};
 localStorage.setItem(localStorageConfigId, JSON.stringify(DevToolConfigs));
 
 var setConfig = function setConfig(keys, value) {
-  set.set.apply(void 0, [DevToolConfigs].concat(_toConsumableArray(keys), [value]));
+  set.set.apply(void 0, [DevToolConfigs].concat(_toConsumableArray([].concat(keys)), [value]));
   localStorage.setItem(localStorageConfigId, JSON.stringify(DevToolConfigs));
 };
 

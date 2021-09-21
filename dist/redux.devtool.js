@@ -2809,8 +2809,8 @@ var MainContainer = emotion_styled_base_browser_esm("div", {
   target: "e1iet7pr12",
   label: "MainContainer"
 })( true ? {
-  name: "497msy",
-  styles: "position:relative;display:flex;flex-direction:row;height:calc(100% - 40px)"
+  name: "alg2l6",
+  styles: "position:relative;display:flex;flex-direction:row;height:calc(100% - 85px)"
 } : 0);
 
 var ActionList = /*#__PURE__*/emotion_styled_base_browser_esm(Panel, {
@@ -2948,7 +2948,7 @@ var getColumns = function getColumns() {
   return [createColumn('#', 'index'), createColumn('Type', 'typeDisplay'), createColumn('Store', 'storeId'), createColumn('Action', 'actionId'), createColumn('Time (s)', 'time')];
 };
 
-var getFilters = function getFilters() {
+var getTypeFilters = function getTypeFilters() {
   return Object.entries((external_Redux_default()).TYPES).reduce(function (acc, _ref2) {
     var _ref3 = _slicedToArray(_ref2, 2),
         key = _ref3[0],
@@ -2957,49 +2957,70 @@ var getFilters = function getFilters() {
     acc[value] = {
       name: value,
       key: value,
-      isShown: (0,get.get)(window.getDevToolConfigs(), 'filters', value, (0,get.defaults)(true))
+      isShown: (0,get.get)(window.getDevToolConfigs(), 'typeFilters', value, (0,get.defaults)(true))
     };
     return acc;
   }, {});
 };
 
+var getStoreFilters = function getStoreFilters(actionLog) {
+  return (actionLog || []).reduce(function (acc, _ref4) {
+    var storeId = _ref4.storeId;
+    acc[storeId] = acc[storeId] || {
+      name: storeId,
+      key: storeId,
+      isShown: (0,get.get)(window.getDevToolConfigs(), 'storeFilters', storeId, (0,get.defaults)(true))
+    };
+    return acc;
+  }, {});
+};
+
+var actionLogSnapshot = window.getActionLog().slice(0);
+
 var ReduxDevTool = function ReduxDevTool() {
-  var _React$useState3 = external_React_default().useState(getFilters()),
+  var _React$useState3 = external_React_default().useState(getStoreFilters(actionLogSnapshot)),
       _React$useState4 = _slicedToArray(_React$useState3, 2),
-      filters = _React$useState4[0],
-      setFilters = _React$useState4[1];
+      storeFilters = _React$useState4[0],
+      setStoreFilters = _React$useState4[1];
 
-  var _React$useState5 = external_React_default().useState(getColumns()),
+  var _React$useState5 = external_React_default().useState(getTypeFilters()),
       _React$useState6 = _slicedToArray(_React$useState5, 2),
-      columns = _React$useState6[0],
-      setColumns = _React$useState6[1];
+      typeFilters = _React$useState6[0],
+      setTypeFilters = _React$useState6[1];
 
-  var _React$useState7 = external_React_default().useState(-1),
+  var _React$useState7 = external_React_default().useState(getColumns()),
       _React$useState8 = _slicedToArray(_React$useState7, 2),
-      selectedIndex = _React$useState8[0],
-      setSelectedIndex = _React$useState8[1];
+      columns = _React$useState8[0],
+      setColumns = _React$useState8[1];
 
-  var _React$useState9 = external_React_default().useState(window.getActionLog().slice(0)),
+  var _React$useState9 = external_React_default().useState(-1),
       _React$useState10 = _slicedToArray(_React$useState9, 2),
-      actionLogs = _React$useState10[0],
-      setActionLogs = _React$useState10[1];
+      selectedIndex = _React$useState10[0],
+      setSelectedIndex = _React$useState10[1];
 
-  var _React$useState11 = external_React_default().useState(''),
+  var _React$useState11 = external_React_default().useState(actionLogSnapshot),
       _React$useState12 = _slicedToArray(_React$useState11, 2),
-      actionDiffHtml = _React$useState12[0],
-      setActionDiffHtml = _React$useState12[1];
+      actionLogs = _React$useState12[0],
+      setActionLogs = _React$useState12[1];
 
   var _React$useState13 = external_React_default().useState(''),
       _React$useState14 = _slicedToArray(_React$useState13, 2),
-      payload = _React$useState14[0],
-      setPayload = _React$useState14[1];
+      actionDiffHtml = _React$useState14[0],
+      setActionDiffHtml = _React$useState14[1];
+
+  var _React$useState15 = external_React_default().useState(''),
+      _React$useState16 = _slicedToArray(_React$useState15, 2),
+      payload = _React$useState16[0],
+      setPayload = _React$useState16[1];
 
   external_React_default().useEffect(function () {
     var actionListener = actionListener;
 
     if (actionListener == null) {
       actionListener = function actionListener(newActionLog) {
-        setActionLogs(newActionLog.slice(0));
+        var newActionLogSnapshot = newActionLog.slice(0);
+        setActionLogs(newActionLogSnapshot);
+        setStoreFilters(getStoreFilters(newActionLogSnapshot));
       };
 
       window.setSubscriber(actionListener);
@@ -3009,10 +3030,10 @@ var ReduxDevTool = function ReduxDevTool() {
       window.removeSubscriber(actionListener);
     };
   }, []);
-  return /*#__PURE__*/external_React_default().createElement((external_React_default()).Fragment, null, /*#__PURE__*/_jsx(Toolbar, {}, void 0, /*#__PURE__*/_jsx(ColumnToggles, {}, void 0, columns.map(function (_ref4, i) {
-    var name = _ref4.name,
-        key = _ref4.key,
-        isShown = _ref4.isShown;
+  return /*#__PURE__*/external_React_default().createElement((external_React_default()).Fragment, null, /*#__PURE__*/_jsx(Toolbar, {}, void 0, /*#__PURE__*/_jsx(ColumnToggles, {}, void 0, columns.map(function (_ref5, i) {
+    var name = _ref5.name,
+        key = _ref5.key,
+        isShown = _ref5.isShown;
     return /*#__PURE__*/_jsx(CheckBoxLabel, {
       htmlFor: name
     }, void 0, /*#__PURE__*/_jsx(CheckBox, {
@@ -3024,10 +3045,10 @@ var ReduxDevTool = function ReduxDevTool() {
         setColumns(getColumns());
       }
     }, "".concat(key, "-configs-").concat(i)), name);
-  })), /*#__PURE__*/_jsx(Filters, {}, void 0, Object.values(filters).map(function (_ref5, i) {
-    var name = _ref5.name,
-        key = _ref5.key,
-        isShown = _ref5.isShown;
+  })), /*#__PURE__*/_jsx(Filters, {}, void 0, Object.values(typeFilters).map(function (_ref6, i) {
+    var name = _ref6.name,
+        key = _ref6.key,
+        isShown = _ref6.isShown;
     return /*#__PURE__*/_jsx(CheckBoxLabel, {
       htmlFor: name
     }, void 0, /*#__PURE__*/_jsx(CheckBox, {
@@ -3035,16 +3056,31 @@ var ReduxDevTool = function ReduxDevTool() {
       type: "checkbox",
       checked: isShown,
       onChange: function onChange() {
-        setConfig(['filters', key], !isShown);
-        setFilters(getFilters());
+        setConfig(['typeFilters', key], !isShown);
+        setTypeFilters(getTypeFilters());
+      }
+    }, "".concat(key, "-configs-").concat(i)), name);
+  }))), /*#__PURE__*/_jsx(Toolbar, {}, void 0, /*#__PURE__*/_jsx(ColumnToggles, {}, void 0, Object.values(storeFilters).map(function (_ref7, i) {
+    var name = _ref7.name,
+        key = _ref7.key,
+        isShown = _ref7.isShown;
+    return /*#__PURE__*/_jsx(CheckBoxLabel, {
+      htmlFor: name
+    }, void 0, /*#__PURE__*/_jsx(CheckBox, {
+      name: name,
+      type: "checkbox",
+      checked: isShown,
+      onChange: function onChange() {
+        setConfig(['storeFilters', key], !isShown);
+        setStoreFilters(getStoreFilters(actionLogs));
       }
     }, "".concat(key, "-configs-").concat(i)), name);
   }))), /*#__PURE__*/_jsx(MainContainer, {}, void 0, /*#__PURE__*/_jsx(ActionList, {}, void 0, /*#__PURE__*/_jsx(ActionListTable, {}, void 0, /*#__PURE__*/_jsx("thead", {}, void 0, /*#__PURE__*/_jsx(TableRow, {
     isShown: true
-  }, void 0, columns.map(function (_ref6) {
-    var name = _ref6.name,
-        key = _ref6.key,
-        isShown = _ref6.isShown;
+  }, void 0, columns.map(function (_ref8) {
+    var name = _ref8.name,
+        key = _ref8.key,
+        isShown = _ref8.isShown;
     return /*#__PURE__*/_jsx(TableHeader, {
       isShown: isShown
     }, key, name);
@@ -3057,10 +3093,10 @@ var ReduxDevTool = function ReduxDevTool() {
         setSelectedIndex(index);
       },
       isSelected: index === selectedIndex,
-      isShown: (0,get.get)(filters, rowData.type, 'isShown')
-    }, index, columns.map(function (_ref7, i) {
-      var key = _ref7.key,
-          isShown = _ref7.isShown;
+      isShown: (0,get.get)(typeFilters, rowData.type, 'isShown') && (0,get.get)(storeFilters, rowData.storeId, 'isShown')
+    }, index, columns.map(function (_ref9, i) {
+      var key = _ref9.key,
+          isShown = _ref9.isShown;
       return /*#__PURE__*/_jsx(TableData, {
         isShown: isShown
       }, "".concat(key, "-").concat(i), rowData[key]);

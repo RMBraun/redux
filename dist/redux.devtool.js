@@ -2945,7 +2945,7 @@ var createColumn = function createColumn(name, key) {
 };
 
 var getColumns = function getColumns() {
-  return [createColumn('#', 'index'), createColumn('Type', 'typeDisplay'), createColumn('Id', 'id'), createColumn('Time (s)', 'time')];
+  return [createColumn('#', 'index'), createColumn('Type', 'typeDisplay'), createColumn('Store', 'storeId'), createColumn('Action', 'actionId'), createColumn('Time (s)', 'time')];
 };
 
 var getFilters = function getFilters() {
@@ -3051,7 +3051,8 @@ var ReduxDevTool = function ReduxDevTool() {
   }))), /*#__PURE__*/_jsx("tbody", {}, void 0, actionLogs.map(function (rowData, index) {
     return /*#__PURE__*/_jsx(TableRow, {
       onClick: function onClick() {
-        setActionDiffHtml(jsondiffpatch.formatters.html.format(rowData.delta));
+        console.log(window.jsondiffpatch);
+        setActionDiffHtml(window.jsondiffpatch.formatters.html.format(rowData.delta));
         setPayload(JSON.stringify(rowData.payload, null, 2));
         setSelectedIndex(index);
       },

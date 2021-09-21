@@ -1,8 +1,51 @@
 <html>
-  <header>
+  <head>
     <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
     <script src="dist/redux.js"></script>
+    <script src="static/jsondiffpatch.umd.min.js"></script>
     <script src="dist/redux.devtool.loader.js" data-devtool-script="dist/redux.devtool.js"></script>
-  </header>
+    <script>
+      Redux.init({ test: { count: 0 } })
+      Redux.createActions('test', {
+        one: store => {
+          store.test.count = (store.test.count || 0) + 1
+          return store
+        },
+        two: store => {
+          store.test.count = (store.test.count || 0) + 2
+          return store
+        },
+      })
+
+      Redux.init({ testTwo: { backCount: 99 } })
+      Redux.createActions('testTwo', {
+        one: store => {
+          store.testTwo.backCount = (store.testTwo.backCount || 99) - 1
+          return store
+        },
+        two: store => {
+          store.testTwo.backCount = (store.testTwo.backCount || 99) - 2
+          return store
+        },
+      })
+
+      Redux.callAction('testTwo', 'one')
+      Redux.callAction('test', 'one')
+      Redux.callAction('testTwo', 'two')
+      Redux.callAction('test', 'two')
+      Redux.callAction('testTwo', 'one')
+      Redux.callAction('test', 'one')
+
+      Redux.createActions('none', {
+        multi: store => {
+          store.testTwo.backCount = (store.testTwo.backCount || 99) - 1
+          store.test.count = (store.test.count || 0) + 1
+          return store
+        },
+      })
+
+      Redux.callAction('none', 'multi')
+    </script>
+  </head>
 </html>

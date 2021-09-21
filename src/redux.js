@@ -31,6 +31,12 @@ export default class Redux {
   }
 
   static init(initialState = {}, defaultState = {}) {
+    if (typeof initialState !== 'object' || initialState.constructor !== {}.constructor) {
+      throw new Error(
+        `Redux initial state must be an object ({}) but recieved ${initialState && initialState.constructor}`
+      )
+    }
+
     Object.assign(Redux.getInstance().store, defaultState, initialState)
   }
 
@@ -66,12 +72,12 @@ export default class Redux {
 
   //listen for Redux Actions and Epics
   Redux.addActionListener({
-    [Actions.actionOne]: ({ id, type, time, payload, prevStore, store }) => {
+    [Actions.actionOne]: ({ id, storeId, type, time, payload, prevStore, store }) => {
       console.log(id, payload)
     }
   })
 
-  Redux.addActionListener(function ({ id, type, time, payload, prevStore, store }) {
+  Redux.addActionListener(function ({ id, storeId, type, time, payload, prevStore, store }) {
     if(id === Actions.actionOne.toString()) {
         console.log(id, payload)
     }
@@ -80,7 +86,7 @@ export default class Redux {
   //can bind to multiple actions for a single callback
   Redux.addActionListener([
     { ids: [Actions.actionOne, Actions.actionTwo], 
-      callback: ({ id, type, time, payload, prevStore, store }) => {
+      callback: ({ id, storeId, type, time, payload, prevStore, store }) => {
         console.log(id, payload)
       }
     }
@@ -179,6 +185,7 @@ export default class Redux {
         if (typeof actionListener === 'function') {
           actionListener({
             id: actionId,
+            storeId: reduxId,
             type: TYPES.ACTION,
             time: Date.now(),
             payload,
@@ -234,6 +241,7 @@ export default class Redux {
         if (typeof actionListener === 'function') {
           actionListener({
             id: epicId,
+            storeId: reduxId,
             type: TYPES.EPIC,
             time: Date.now(),
             payload,
@@ -298,6 +306,8 @@ if (typeof window !== 'undefined') {
 
       if (typeof action === 'function') {
         action(payload)
+      } else {
+        console.warn(`The action ${actionId} is not a function`)
       }
     },
     callEpic: (reduxId, epicId, payload) => {
@@ -307,6 +317,8 @@ if (typeof window !== 'undefined') {
 
       if (typeof epic === 'function') {
         epic(payload)
+      } else {
+        console.warn(`The epic ${epicId} is not a function`)
       }
     },
   }

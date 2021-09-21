@@ -219,7 +219,8 @@ const createColumn = (name, key, defaultValue = true) => ({
 const getColumns = () => [
   createColumn('#', 'index'),
   createColumn('Type', 'typeDisplay'),
-  createColumn('Id', 'id'),
+  createColumn('Store', 'storeId'),
+  createColumn('Action', 'actionId'),
   createColumn('Time (s)', 'time'),
 ]
 
@@ -311,7 +312,8 @@ const ReduxDevTool = () => {
                 <TableRow
                   key={index}
                   onClick={() => {
-                    setActionDiffHtml(jsondiffpatch.formatters.html.format(rowData.delta))
+                    console.log(window.jsondiffpatch)
+                    setActionDiffHtml(window.jsondiffpatch.formatters.html.format(rowData.delta))
                     setPayload(JSON.stringify(rowData.payload, null, 2))
                     setSelectedIndex(index)
                   }}

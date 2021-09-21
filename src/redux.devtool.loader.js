@@ -1,7 +1,5 @@
 import Redux from 'redux'
-import jsondiffpatch from 'jsondiffpatch'
-
-import { get } from '@rybr/lenses/get'
+import { set } from '@rybr/lenses/set'
 
 //script data
 const data = document.currentScript.dataset
@@ -15,9 +13,7 @@ DevToolConfigs.filters = DevToolConfigs.filters || {}
 localStorage.setItem(localStorageConfigId, JSON.stringify(DevToolConfigs))
 
 const setConfig = (keys, value) => {
-  const chain = [].concat(keys)
-  const lastKey = chain.pop()
-  get(DevToolConfigs, ...chain.concat(x => (x[lastKey] = value)))
+  set(DevToolConfigs, ...keys, value)
   localStorage.setItem(localStorageConfigId, JSON.stringify(DevToolConfigs))
 }
 
@@ -39,15 +35,16 @@ const ReduxDevTool = (function () {
 
   return {
     actionLog,
-    actionListener: ({ id, type, time, prevStore, store, payload }) => {
+    actionListener: ({ id, storeId, type, time, prevStore, store, payload }) => {
       actionLog.push({
-        id,
+        storeId,
+        actionId: id,
         type,
         index: actionLog.length + 1,
         typeDisplay: type,
         time: ((time - currTime) / 1000).toFixed(3),
         payload,
-        delta: type === Redux.TYPES.ACTION ? jsondiffpatch.diff(prevStore, store) : undefined,
+        delta: type === Redux.TYPES.ACTION ? window.jsondiffpatch.diff(prevStore, store) : undefined,
       })
 
       subscribers.forEach(subscriber => {

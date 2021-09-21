@@ -78,8 +78,6 @@ var __webpack_exports__ = {};
 /* unused harmony export default */
 /* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(456);
 /* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_utils__WEBPACK_IMPORTED_MODULE_0__);
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -97,6 +95,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -146,6 +146,11 @@ var Redux = /*#__PURE__*/function () {
     value: function init() {
       var initialState = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var defaultState = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+      if (_typeof(initialState) !== 'object' || initialState.constructor !== {}.constructor) {
+        throw new Error("Redux initial state must be an object ({}) but recieved ".concat(initialState && initialState.constructor));
+      }
+
       Object.assign(Redux.getInstance().store, defaultState, initialState);
     }
   }, {
@@ -189,11 +194,11 @@ var Redux = /*#__PURE__*/function () {
     import { Actions } from './myRedux'
      //listen for Redux Actions and Epics
     Redux.addActionListener({
-      [Actions.actionOne]: ({ id, type, time, payload, prevStore, store }) => {
+      [Actions.actionOne]: ({ id, storeId, type, time, payload, prevStore, store }) => {
         console.log(id, payload)
       }
     })
-     Redux.addActionListener(function ({ id, type, time, payload, prevStore, store }) {
+     Redux.addActionListener(function ({ id, storeId, type, time, payload, prevStore, store }) {
       if(id === Actions.actionOne.toString()) {
           console.log(id, payload)
       }
@@ -201,7 +206,7 @@ var Redux = /*#__PURE__*/function () {
      //can bind to multiple actions for a single callback
     Redux.addActionListener([
       { ids: [Actions.actionOne, Actions.actionTwo], 
-        callback: ({ id, type, time, payload, prevStore, store }) => {
+        callback: ({ id, storeId, type, time, payload, prevStore, store }) => {
           console.log(id, payload)
         }
       }
@@ -313,6 +318,7 @@ var Redux = /*#__PURE__*/function () {
           if (typeof actionListener === 'function') {
             actionListener({
               id: actionId,
+              storeId: reduxId,
               type: TYPES.ACTION,
               time: Date.now(),
               payload: payload,
@@ -377,6 +383,7 @@ var Redux = /*#__PURE__*/function () {
           if (typeof actionListener === 'function') {
             actionListener({
               id: epicId,
+              storeId: reduxId,
               type: TYPES.EPIC,
               time: Date.now(),
               payload: payload,
@@ -445,6 +452,8 @@ if (typeof window !== 'undefined') {
 
       if (typeof action === 'function') {
         action(payload);
+      } else {
+        console.warn("The action ".concat(actionId, " is not a function"));
       }
     },
     callEpic: function callEpic(reduxId, epicId, payload) {
@@ -454,6 +463,8 @@ if (typeof window !== 'undefined') {
 
       if (typeof epic === 'function') {
         epic(payload);
+      } else {
+        console.warn("The epic ".concat(epicId, " is not a function"));
       }
     }
   };

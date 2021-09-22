@@ -151,7 +151,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 92:
+/***/ 420:
 /***/ ((module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -2597,9 +2597,9 @@ var insertStyleElement_default = /*#__PURE__*/__webpack_require__.n(insertStyleE
 // EXTERNAL MODULE: ./node_modules/style-loader/dist/runtime/styleTagTransform.js
 var styleTagTransform = __webpack_require__(589);
 var styleTagTransform_default = /*#__PURE__*/__webpack_require__.n(styleTagTransform);
-// EXTERNAL MODULE: ./node_modules/css-loader/dist/cjs.js!./src/jsondiffpatch.html.css
-var jsondiffpatch_html = __webpack_require__(92);
-;// CONCATENATED MODULE: ./src/jsondiffpatch.html.css
+// EXTERNAL MODULE: ./node_modules/css-loader/dist/cjs.js!./src/formatters/html.css
+var html = __webpack_require__(420);
+;// CONCATENATED MODULE: ./src/formatters/html.css
 
       
       
@@ -2621,13 +2621,614 @@ options.setAttributes = (setAttributesWithoutAttributes_default());
 options.domAPI = (styleDomAPI_default());
 options.insertStyleElement = (insertStyleElement_default());
 
-var update = injectStylesIntoStyleTag_default()(jsondiffpatch_html/* default */.Z, options);
+var update = injectStylesIntoStyleTag_default()(html/* default */.Z, options);
 
 
 
 
-       /* harmony default export */ const src_jsondiffpatch_html = (jsondiffpatch_html/* default */.Z && jsondiffpatch_html/* default.locals */.Z.locals ? jsondiffpatch_html/* default.locals */.Z.locals : undefined);
+       /* harmony default export */ const formatters_html = (html/* default */.Z && html/* default.locals */.Z.locals ? html/* default.locals */.Z.locals : undefined);
 
+;// CONCATENATED MODULE: ./src/formatters/base.js
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+//https://github.com/benjamine/jsondiffpatch/blob/a8cde4c666a8a25d09d8f216c7f19397f2e1b569/src/formatters/base.js#L39
+var isArray = typeof Array.isArray === 'function' ? Array.isArray : function (a) {
+  return a instanceof Array;
+};
+var getObjectKeys = typeof Object.keys === 'function' ? function (obj) {
+  return Object.keys(obj);
+} : function (obj) {
+  var names = [];
+
+  for (var property in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, property)) {
+      names.push(property);
+    }
+  }
+
+  return names;
+};
+
+var trimUnderscore = function trimUnderscore(str) {
+  if (str.substr(0, 1) === '_') {
+    return str.slice(1);
+  }
+
+  return str;
+};
+
+var arrayKeyToSortNumber = function arrayKeyToSortNumber(key) {
+  if (key === '_t') {
+    return -1;
+  } else {
+    if (key.substr(0, 1) === '_') {
+      return parseInt(key.slice(1), 10);
+    } else {
+      return parseInt(key, 10) + 0.1;
+    }
+  }
+};
+
+var arrayKeyComparer = function arrayKeyComparer(key1, key2) {
+  return arrayKeyToSortNumber(key1) - arrayKeyToSortNumber(key2);
+};
+
+var BaseFormatter = /*#__PURE__*/function () {
+  function BaseFormatter() {
+    _classCallCheck(this, BaseFormatter);
+  }
+
+  _createClass(BaseFormatter, [{
+    key: "format",
+    value: function format(delta, left) {
+      var context = {};
+      this.prepareContext(context);
+      this.recurse(context, delta, left);
+      return this.finalize(context);
+    }
+  }, {
+    key: "prepareContext",
+    value: function prepareContext(context) {
+      context.buffer = [];
+
+      context.out = function () {
+        var _this$buffer;
+
+        (_this$buffer = this.buffer).push.apply(_this$buffer, arguments);
+      };
+    }
+  }, {
+    key: "typeFormattterNotFound",
+    value: function typeFormattterNotFound(context, deltaType) {
+      throw new Error("cannot format delta type: ".concat(deltaType));
+    }
+  }, {
+    key: "typeFormattterErrorFormatter",
+    value: function typeFormattterErrorFormatter(context, err) {
+      return err.toString();
+    }
+  }, {
+    key: "finalize",
+    value: function finalize(_ref) {
+      var buffer = _ref.buffer;
+
+      if (isArray(buffer)) {
+        return buffer.join('');
+      }
+    }
+  }, {
+    key: "recurse",
+    value: function recurse(context, delta, left, key, leftKey, movedFrom, isLast) {
+      var useMoveOriginHere = delta && movedFrom;
+      var leftValue = useMoveOriginHere ? movedFrom.value : left;
+
+      if (typeof delta === 'undefined' && typeof key === 'undefined') {
+        return undefined;
+      }
+
+      var type = this.getDeltaType(delta, movedFrom);
+      var nodeType = type === 'node' ? delta._t === 'a' ? 'array' : 'object' : '';
+
+      if (typeof key !== 'undefined') {
+        this.nodeBegin(context, key, leftKey, type, nodeType, isLast);
+      } else {
+        this.rootBegin(context, type, nodeType);
+      }
+
+      var typeFormattter;
+
+      try {
+        typeFormattter = this["format_".concat(type)] || this.typeFormattterNotFound(context, type);
+        typeFormattter.call(this, context, delta, leftValue, key, leftKey, movedFrom);
+      } catch (err) {
+        this.typeFormattterErrorFormatter(context, err, delta, leftValue, key, leftKey, movedFrom);
+
+        if (typeof console !== 'undefined' && console.error) {
+          console.error(err.stack);
+        }
+      }
+
+      if (typeof key !== 'undefined') {
+        this.nodeEnd(context, key, leftKey, type, nodeType, isLast);
+      } else {
+        this.rootEnd(context, type, nodeType);
+      }
+    }
+  }, {
+    key: "formatDeltaChildren",
+    value: function formatDeltaChildren(context, delta, left) {
+      var self = this;
+      this.forEachDeltaKey(delta, left, function (key, leftKey, movedFrom, isLast) {
+        self.recurse(context, delta[key], left ? left[leftKey] : undefined, key, leftKey, movedFrom, isLast);
+      });
+    }
+  }, {
+    key: "forEachDeltaKey",
+    value: function forEachDeltaKey(delta, left, fn) {
+      var keys = getObjectKeys(delta);
+      var arrayKeys = delta._t === 'a';
+      var moveDestinations = {};
+      var name;
+
+      if (typeof left !== 'undefined') {
+        for (name in left) {
+          if (Object.prototype.hasOwnProperty.call(left, name)) {
+            if (typeof delta[name] === 'undefined' && (!arrayKeys || typeof delta["_".concat(name)] === 'undefined')) {
+              keys.push(name);
+            }
+          }
+        }
+      } // look for move destinations
+
+
+      for (name in delta) {
+        if (Object.prototype.hasOwnProperty.call(delta, name)) {
+          var value = delta[name];
+
+          if (isArray(value) && value[2] === 3) {
+            moveDestinations[value[1].toString()] = {
+              key: name,
+              value: left && left[parseInt(name.substr(1))]
+            };
+
+            if (this.includeMoveDestinations !== false) {
+              if (typeof left === 'undefined' && typeof delta[value[1]] === 'undefined') {
+                keys.push(value[1].toString());
+              }
+            }
+          }
+        }
+      }
+
+      if (arrayKeys) {
+        keys.sort(arrayKeyComparer);
+      } else {
+        keys.sort();
+      }
+
+      for (var index = 0, length = keys.length; index < length; index++) {
+        var key = keys[index];
+
+        if (arrayKeys && key === '_t') {
+          continue;
+        }
+
+        var leftKey = arrayKeys ? typeof key === 'number' ? key : parseInt(trimUnderscore(key), 10) : key;
+        var isLast = index === length - 1;
+        fn(key, leftKey, moveDestinations[leftKey], isLast);
+      }
+    }
+  }, {
+    key: "getDeltaType",
+    value: function getDeltaType(delta, movedFrom) {
+      if (typeof delta === 'undefined') {
+        if (typeof movedFrom !== 'undefined') {
+          return 'movedestination';
+        }
+
+        return 'unchanged';
+      }
+
+      if (isArray(delta)) {
+        if (delta.length === 1) {
+          return 'added';
+        }
+
+        if (delta.length === 2) {
+          return 'modified';
+        }
+
+        if (delta.length === 3 && delta[2] === 0) {
+          return 'deleted';
+        }
+
+        if (delta.length === 3 && delta[2] === 2) {
+          return 'textdiff';
+        }
+
+        if (delta.length === 3 && delta[2] === 3) {
+          return 'moved';
+        }
+      } else if (_typeof(delta) === 'object') {
+        return 'node';
+      }
+
+      return 'unknown';
+    }
+  }, {
+    key: "parseTextDiff",
+    value: function parseTextDiff(value) {
+      var output = [];
+      var lines = value.split('\n@@ ');
+
+      for (var i = 0, l = lines.length; i < l; i++) {
+        var line = lines[i];
+        var lineOutput = {
+          pieces: []
+        };
+        var location = /^(?:@@ )?[-+]?(\d+),(\d+)/.exec(line).slice(1);
+        lineOutput.location = {
+          line: location[0],
+          chr: location[1]
+        };
+        var pieces = line.split('\n').slice(1);
+
+        for (var pieceIndex = 0, piecesLength = pieces.length; pieceIndex < piecesLength; pieceIndex++) {
+          var piece = pieces[pieceIndex];
+
+          if (!piece.length) {
+            continue;
+          }
+
+          var pieceOutput = {
+            type: 'context'
+          };
+
+          if (piece.substr(0, 1) === '+') {
+            pieceOutput.type = 'added';
+          } else if (piece.substr(0, 1) === '-') {
+            pieceOutput.type = 'deleted';
+          }
+
+          pieceOutput.text = piece.slice(1);
+          lineOutput.pieces.push(pieceOutput);
+        }
+
+        output.push(lineOutput);
+      }
+
+      return output;
+    }
+  }]);
+
+  return BaseFormatter;
+}();
+
+/* harmony default export */ const base = (BaseFormatter);
+;// CONCATENATED MODULE: ./src/formatters/html.js
+function html_typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { html_typeof = function _typeof(obj) { return typeof obj; }; } else { html_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return html_typeof(obj); }
+
+function html_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function html_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function html_createClass(Constructor, protoProps, staticProps) { if (protoProps) html_defineProperties(Constructor.prototype, protoProps); if (staticProps) html_defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (html_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+//https://github.com/benjamine/jsondiffpatch/blob/master/src/formatters/html.js
+
+
+var HtmlFormatter = /*#__PURE__*/function (_BaseFormatter) {
+  _inherits(HtmlFormatter, _BaseFormatter);
+
+  var _super = _createSuper(HtmlFormatter);
+
+  function HtmlFormatter() {
+    html_classCallCheck(this, HtmlFormatter);
+
+    return _super.apply(this, arguments);
+  }
+
+  html_createClass(HtmlFormatter, [{
+    key: "typeFormattterErrorFormatter",
+    value: function typeFormattterErrorFormatter(context, err) {
+      context.out("<pre class=\"jsondiffpatch-error\">".concat(err, "</pre>"));
+    }
+  }, {
+    key: "formatValue",
+    value: function formatValue(context, value) {
+      context.out("<pre>".concat(htmlEscape(JSON.stringify(value, null, 2)), "</pre>"));
+    }
+  }, {
+    key: "formatTextDiffString",
+    value: function formatTextDiffString(context, value) {
+      var lines = this.parseTextDiff(value);
+      context.out('<ul class="jsondiffpatch-textdiff">');
+
+      for (var i = 0, l = lines.length; i < l; i++) {
+        var line = lines[i];
+        context.out("<li><div class=\"jsondiffpatch-textdiff-location\">" + "<span class=\"jsondiffpatch-textdiff-line-number\">".concat(line.location.line, "</span><span class=\"jsondiffpatch-textdiff-char\">").concat(line.location.chr, "</span></div><div class=\"jsondiffpatch-textdiff-line\">"));
+        var pieces = line.pieces;
+
+        for (var pieceIndex = 0, piecesLength = pieces.length; pieceIndex < piecesLength; pieceIndex++) {
+          /* global decodeURI */
+          var piece = pieces[pieceIndex];
+          context.out("<span class=\"jsondiffpatch-textdiff-".concat(piece.type, "\">").concat(htmlEscape(decodeURI(piece.text)), "</span>"));
+        }
+
+        context.out('</div></li>');
+      }
+
+      context.out('</ul>');
+    }
+  }, {
+    key: "rootBegin",
+    value: function rootBegin(context, type, nodeType) {
+      var nodeClass = "jsondiffpatch-".concat(type).concat(nodeType ? " jsondiffpatch-child-node-type-".concat(nodeType) : '');
+      context.out("<div class=\"jsondiffpatch-delta ".concat(nodeClass, "\">"));
+    }
+  }, {
+    key: "rootEnd",
+    value: function rootEnd(context) {
+      context.out("</div>".concat(context.hasArrows ? "<script type=\"text/javascript\">setTimeout(" + "".concat(adjustArrows.toString(), ",10);</script>") : ''));
+    }
+  }, {
+    key: "nodeBegin",
+    value: function nodeBegin(context, key, leftKey, type, nodeType) {
+      var nodeClass = "jsondiffpatch-".concat(type).concat(nodeType ? " jsondiffpatch-child-node-type-".concat(nodeType) : '');
+      context.out("<li class=\"".concat(nodeClass, "\" data-key=\"").concat(leftKey, "\">") + "<div class=\"jsondiffpatch-property-name\">".concat(leftKey, "</div>"));
+    }
+  }, {
+    key: "nodeEnd",
+    value: function nodeEnd(context) {
+      context.out('</li>');
+    }
+    /* jshint camelcase: false */
+
+    /* eslint-disable camelcase */
+
+  }, {
+    key: "format_unchanged",
+    value: function format_unchanged(context, delta, left) {
+      if (typeof left === 'undefined') {
+        return;
+      }
+
+      context.out('<div class="jsondiffpatch-value">');
+      this.formatValue(context, left);
+      context.out('</div>');
+    }
+  }, {
+    key: "format_movedestination",
+    value: function format_movedestination(context, delta, left) {
+      if (typeof left === 'undefined') {
+        return;
+      }
+
+      context.out('<div class="jsondiffpatch-value">');
+      this.formatValue(context, left);
+      context.out('</div>');
+    }
+  }, {
+    key: "format_node",
+    value: function format_node(context, delta, left) {
+      // recurse
+      var nodeType = delta._t === 'a' ? 'array' : 'object';
+      context.out("<ul class=\"jsondiffpatch-node jsondiffpatch-node-type-".concat(nodeType, "\">"));
+      this.formatDeltaChildren(context, delta, left);
+      context.out('</ul>');
+    }
+  }, {
+    key: "format_added",
+    value: function format_added(context, delta) {
+      context.out('<div class="jsondiffpatch-value">');
+      this.formatValue(context, delta[0]);
+      context.out('</div>');
+    }
+  }, {
+    key: "format_modified",
+    value: function format_modified(context, delta) {
+      context.out('<div class="jsondiffpatch-value jsondiffpatch-left-value">');
+      this.formatValue(context, delta[0]);
+      context.out('</div>' + '<div class="jsondiffpatch-value jsondiffpatch-right-value">');
+      this.formatValue(context, delta[1]);
+      context.out('</div>');
+    }
+  }, {
+    key: "format_deleted",
+    value: function format_deleted(context, delta) {
+      context.out('<div class="jsondiffpatch-value">');
+      this.formatValue(context, delta[0]);
+      context.out('</div>');
+    }
+  }, {
+    key: "format_moved",
+    value: function format_moved(context, delta) {
+      context.out('<div class="jsondiffpatch-value">');
+      this.formatValue(context, delta[0]);
+      context.out("</div><div class=\"jsondiffpatch-moved-destination\">".concat(delta[1], "</div>")); // draw an SVG arrow from here to move destination
+
+      context.out(
+      /* jshint multistr: true */
+      "<div class=\"jsondiffpatch-arrow\" " + "style=\"position: relative; left: -34px;\">\n          <svg width=\"30\" height=\"60\" " + "style=\"position: absolute; display: none;\">\n          <defs>\n              <marker id=\"markerArrow\" markerWidth=\"8\" markerHeight=\"8\"\n                 refx=\"2\" refy=\"4\"\n                     orient=\"auto\" markerUnits=\"userSpaceOnUse\">\n                  <path d=\"M1,1 L1,7 L7,4 L1,1\" style=\"fill: #339;\" />\n              </marker>\n          </defs>\n          <path d=\"M30,0 Q-10,25 26,50\"\n            style=\"stroke: #88f; stroke-width: 2px; fill: none; " + "stroke-opacity: 0.5; marker-end: url(#markerArrow);\"\n          ></path>\n          </svg>\n      </div>");
+      context.hasArrows = true;
+    }
+  }, {
+    key: "format_textdiff",
+    value: function format_textdiff(context, delta) {
+      context.out('<div class="jsondiffpatch-value">');
+      this.formatTextDiffString(context, delta[0]);
+      context.out('</div>');
+    }
+  }]);
+
+  return HtmlFormatter;
+}(base);
+
+function htmlEscape(text) {
+  var html = text;
+  var replacements = [[/&/g, '&amp;'], [/</g, '&lt;'], [/>/g, '&gt;'], [/'/g, '&apos;'], [/"/g, '&quot;']];
+
+  for (var i = 0; i < replacements.length; i++) {
+    html = html.replace(replacements[i][0], replacements[i][1]);
+  }
+
+  return html;
+}
+
+var adjustArrows = function jsondiffpatchHtmlFormatterAdjustArrows(nodeArg) {
+  var node = nodeArg || document;
+
+  var getElementText = function getElementText(_ref) {
+    var textContent = _ref.textContent,
+        innerText = _ref.innerText;
+    return textContent || innerText;
+  };
+
+  var eachByQuery = function eachByQuery(el, query, fn) {
+    var elems = el.querySelectorAll(query);
+
+    for (var i = 0, l = elems.length; i < l; i++) {
+      fn(elems[i]);
+    }
+  };
+
+  var eachChildren = function eachChildren(_ref2, fn) {
+    var children = _ref2.children;
+
+    for (var i = 0, l = children.length; i < l; i++) {
+      fn(children[i], i);
+    }
+  };
+
+  eachByQuery(node, '.jsondiffpatch-arrow', function (_ref3) {
+    var parentNode = _ref3.parentNode,
+        children = _ref3.children,
+        style = _ref3.style;
+    var arrowParent = parentNode;
+    var svg = children[0];
+    var path = svg.children[1];
+    svg.style.display = 'none';
+    var destination = getElementText(arrowParent.querySelector('.jsondiffpatch-moved-destination'));
+    var container = arrowParent.parentNode;
+    var destinationElem;
+    eachChildren(container, function (child) {
+      if (child.getAttribute('data-key') === destination) {
+        destinationElem = child;
+      }
+    });
+
+    if (!destinationElem) {
+      return;
+    }
+
+    try {
+      var distance = destinationElem.offsetTop - arrowParent.offsetTop;
+      svg.setAttribute('height', Math.abs(distance) + 6);
+      style.top = "".concat(-8 + (distance > 0 ? 0 : distance), "px");
+      var curve = distance > 0 ? "M30,0 Q-10,".concat(Math.round(distance / 2), " 26,").concat(distance - 4) : "M30,".concat(-distance, " Q-10,").concat(Math.round(-distance / 2), " 26,4");
+      path.setAttribute('d', curve);
+      svg.style.display = '';
+    } catch (err) {}
+  });
+};
+/* jshint camelcase: true */
+
+/* eslint-enable camelcase */
+
+
+var showUnchanged = function showUnchanged(show, node, delay) {
+  var el = node || document.body;
+  var prefix = 'jsondiffpatch-unchanged-';
+  var classes = {
+    showing: "".concat(prefix, "showing"),
+    hiding: "".concat(prefix, "hiding"),
+    visible: "".concat(prefix, "visible"),
+    hidden: "".concat(prefix, "hidden")
+  };
+  var list = el.classList;
+
+  if (!list) {
+    return;
+  }
+
+  if (!delay) {
+    list.remove(classes.showing);
+    list.remove(classes.hiding);
+    list.remove(classes.visible);
+    list.remove(classes.hidden);
+
+    if (show === false) {
+      list.add(classes.hidden);
+    }
+
+    return;
+  }
+
+  if (show === false) {
+    list.remove(classes.showing);
+    list.add(classes.visible);
+    setTimeout(function () {
+      list.add(classes.hiding);
+    }, 10);
+  } else {
+    list.remove(classes.hiding);
+    list.add(classes.showing);
+    list.remove(classes.hidden);
+  }
+
+  var intervalId = setInterval(function () {
+    adjustArrows(el);
+  }, 100);
+  setTimeout(function () {
+    list.remove(classes.showing);
+    list.remove(classes.hiding);
+
+    if (show === false) {
+      list.add(classes.hidden);
+      list.remove(classes.visible);
+    } else {
+      list.add(classes.visible);
+      list.remove(classes.hidden);
+    }
+
+    setTimeout(function () {
+      list.remove(classes.visible);
+      clearInterval(intervalId);
+    }, delay + 400);
+  }, delay);
+};
+var hideUnchanged = function hideUnchanged(node, delay) {
+  return showUnchanged(false, node, delay);
+};
+/* harmony default export */ const src_formatters_html = ((/* unused pure expression or super */ null && (HtmlFormatter)));
+var defaultInstance;
+function format(delta, left) {
+  if (!defaultInstance) {
+    defaultInstance = new HtmlFormatter();
+  }
+
+  return defaultInstance.format(delta, left);
+}
 // EXTERNAL MODULE: ./node_modules/@rybr/lenses/get.js
 var get = __webpack_require__(718);
 ;// CONCATENATED MODULE: ./src/redux.devtool.jsx
@@ -2750,7 +3351,7 @@ function _EMOTION_STRINGIFIED_CSS_ERROR__() {
 
 
 
-var data = document.currentScript.dataset;
+
 
 var PlainButton = emotion_styled_base_browser_esm("button", {
   target: "e1iet7pr19",
@@ -3088,7 +3689,7 @@ var ReduxDevTool = function ReduxDevTool() {
     return /*#__PURE__*/_jsx(TableRow, {
       onClick: function onClick() {
         console.log(window.jsondiffpatch);
-        setActionDiffHtml(window.jsondiffpatch.formatters.html.format(rowData.delta));
+        setActionDiffHtml(format(rowData.delta));
         setPayload(JSON.stringify(rowData.payload, null, 2));
         setSelectedIndex(index);
       },
@@ -3114,10 +3715,10 @@ var ReduxDevTool = function ReduxDevTool() {
   }])));
 };
 
-external_ReactDOM_default().render( /*#__PURE__*/external_React_default().createElement(ReduxDevTool), document.getElementById(data.injectionPointId));
+external_ReactDOM_default().render( /*#__PURE__*/external_React_default().createElement(ReduxDevTool), document.getElementById('ReduxDevTool'));
 
 var onParentRefresh = function onParentRefresh() {
-  var ReduxDevToolEle = document.getElementById(data.injectionPointId); //remove from React DOM
+  var ReduxDevToolEle = document.getElementById('ReduxDevTool'); //remove from React DOM
 
   external_ReactDOM_default().unmountComponentAtNode(ReduxDevToolEle); //remove from physical DOM
 

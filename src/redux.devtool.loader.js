@@ -1,6 +1,8 @@
 import Redux from 'redux'
 import { set } from '@rybr/lenses/set'
 
+const jsondiffpatch = require('jsondiffpatch').create({})
+
 //script data
 const data = document.currentScript.dataset
 
@@ -44,7 +46,7 @@ const ReduxDevTool = (function () {
         typeDisplay: type,
         time: ((time - currTime) / 1000).toFixed(3),
         payload,
-        delta: type === Redux.TYPES.ACTION ? window.jsondiffpatch.diff(prevStore, store) : undefined,
+        delta: type === Redux.TYPES.ACTION ? jsondiffpatch.diff(prevStore, store) : undefined,
       })
 
       subscribers.forEach(subscriber => {
@@ -54,8 +56,6 @@ const ReduxDevTool = (function () {
       })
     },
     startReduxDevTool: () => {
-      const injectionPointId = 'ReduxDevTool'
-
       const devToolWindow = window.open(
         '',
         'ReduxDevTool',
@@ -65,7 +65,6 @@ const ReduxDevTool = (function () {
       //global injection points
       devToolWindow.React = window.React
       devToolWindow.ReactDOM = window.ReactDOM
-      devToolWindow.jsondiffpatch = jsondiffpatch
       devToolWindow.Redux = window.Redux
       devToolWindow.L = window.L
 
@@ -94,15 +93,16 @@ const ReduxDevTool = (function () {
                           margin: 0px;
                         }
 
-                        #${injectionPointId} {
+                        #ReduxDevTool {
                           height: 100vh;
                           width: 100vw;
                         }
                       </style>
+                      <script>${null}</script>
                   </head>
                   <body>
-                      <div id="${injectionPointId}"></div>
-                      <script src="${data.devtoolScript}" data-injection-point-id=${injectionPointId}></script>
+                      <div id="ReduxDevTool"></div>
+                      <script src="${data.devtoolScript}"></script>
                   </body>
               </html>
           `)

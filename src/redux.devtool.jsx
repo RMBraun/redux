@@ -1,13 +1,12 @@
 import Redux from 'redux'
 import React from 'react'
 import ReactDOM from 'react-dom'
-import './jsondiffpatch.html.css'
+import './formatters/html.css'
+import { format as htmlDeltaFormatter } from './formatters/html'
 
 import styled from '@emotion/styled'
 
 import { get, defaults } from '@rybr/lenses/get'
-
-const data = document.currentScript.dataset
 
 const PlainButton = styled.button`
   position: relative;
@@ -349,7 +348,7 @@ const ReduxDevTool = () => {
                   key={index}
                   onClick={() => {
                     console.log(window.jsondiffpatch)
-                    setActionDiffHtml(window.jsondiffpatch.formatters.html.format(rowData.delta))
+                    setActionDiffHtml(htmlDeltaFormatter(rowData.delta))
                     setPayload(JSON.stringify(rowData.payload, null, 2))
                     setSelectedIndex(index)
                   }}
@@ -375,10 +374,10 @@ const ReduxDevTool = () => {
   )
 }
 
-ReactDOM.render(React.createElement(ReduxDevTool), document.getElementById(data.injectionPointId))
+ReactDOM.render(React.createElement(ReduxDevTool), document.getElementById('ReduxDevTool'))
 
 const onParentRefresh = function () {
-  const ReduxDevToolEle = document.getElementById(data.injectionPointId)
+  const ReduxDevToolEle = document.getElementById('ReduxDevTool')
   //remove from React DOM
   ReactDOM.unmountComponentAtNode(ReduxDevToolEle)
   //remove from physical DOM

@@ -6,7 +6,7 @@
     <script src="dist/redux.devtool.loader.js" data-devtool-script="dist/redux.devtool.js"></script>
     <script type="text/javascript">
       Redux.init({ test: { count: 0 } })
-      Redux.createActions('test', {
+      Redux.createActions('storeOne', {
         one: store => {
           store.test.count = (store.test.count || 0) + 1
           return store
@@ -18,7 +18,7 @@
       })
 
       Redux.init({ testTwo: { backCount: 99 } })
-      Redux.createActions('testTwo', {
+      Redux.createActions('storeTwoWithReallyLongName', {
         one: store => {
           store.testTwo.backCount = (store.testTwo.backCount || 99) - 1
           return store
@@ -29,15 +29,15 @@
         },
       })
 
-      Redux.callAction('testTwo', 'one')
-      Redux.callAction('test', 'one')
-      Redux.callAction('testTwo', 'two')
-      Redux.callAction('test', 'two')
-      Redux.callAction('testTwo', 'one')
-      Redux.callAction('test', 'one')
+      Redux.callAction('storeTwoWithReallyLongName', 'one')
+      Redux.callAction('storeOne', 'one')
+      Redux.callAction('storeTwoWithReallyLongName', 'two')
+      Redux.callAction('storeOne', 'two')
+      Redux.callAction('storeTwoWithReallyLongName', 'one')
+      Redux.callAction('storeOne', 'one')
 
-      Redux.createActions('none', {
-        multi: store => {
+      Redux.createActions('storeThree', {
+        multiStoreUpdates: store => {
           store.testTwo.backCount = (store.testTwo.backCount || 99) - 1
           store.test.count = (store.test.count || 0) + 1
           return store
@@ -45,7 +45,7 @@
       })
 
       function buttonClick() {
-        Redux.callAction('none', 'multi')
+        Redux.callAction('storeThree', 'multiStoreUpdates')
       }
     </script>
   </head>

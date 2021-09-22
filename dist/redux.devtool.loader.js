@@ -5231,8 +5231,6 @@ var ReduxDevTool = function () {
         typeDisplay: type,
         time: ((time - currTime) / 1000).toFixed(3),
         payload: payload,
-        store: store,
-        prevStore: prevStore,
         delta: type === (external_Redux_default()).TYPES.ACTION ? jsondiffpatch.diff(prevStore, store) : undefined
       });
       subscribers.forEach(function (subscriber) {
@@ -5245,8 +5243,7 @@ var ReduxDevTool = function () {
       var devToolWindow = window.open('', 'ReduxDevTool', 'height=800,width=1200,status=no,toolbar=no,menubar=no,location=no,scrollbars=yes'); //global injection points
 
       devToolWindow.React = window.React;
-      devToolWindow.ReactDOM = window.ReactDOM; //devToolWindow.jsondiffpatch = jsondiffpatch
-
+      devToolWindow.ReactDOM = window.ReactDOM;
       devToolWindow.Redux = window.Redux;
       devToolWindow.L = window.L; //global helper functions
 

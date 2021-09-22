@@ -120,12 +120,14 @@ const TableData = styled.td`
 `
 
 const ActionDiff = styled.div`
-  width: 100%;
+  width: calc(100% - 30px);
+  padding: 15px;
 `
 
 const Payload = styled.div`
-  width: 100%;
+  width: calc(100% - 30px);
   white-space: pre;
+  padding: 15px;
 `
 
 const TabContainer = styled(Panel)`

@@ -1,5 +1,6 @@
 import Redux from 'redux'
 import { set } from '@rybr/lenses/set'
+import { get } from '@rybr/lenses/get'
 
 const jsondiffpatch = require('jsondiffpatch').create({})
 
@@ -11,6 +12,8 @@ const localStorageConfigId = 'ReduxDevToolConfigs'
 const DevToolConfigs = JSON.parse(localStorage.getItem(localStorageConfigId)) || {}
 DevToolConfigs.columns = DevToolConfigs.columns || {}
 DevToolConfigs.filters = DevToolConfigs.filters || {}
+DevToolConfigs.maximumLines = DevToolConfigs.maximumLines || 200
+DevToolConfigs.maximumMemory = DevToolConfigs.maximumMemory || 10000000
 
 localStorage.setItem(localStorageConfigId, JSON.stringify(DevToolConfigs))
 
@@ -21,8 +24,9 @@ const setConfig = (keys, value) => {
 
 const ReduxDevTool = (function () {
   const currTime = Date.now()
-  const actionLog = []
-  const getActionLog = () => actionLog
+  let actionLog = []
+  let actionLogIndex = 0
+  let actionLogSize = 0
   const subscribers = []
   const setSubscriber = subscriber => {
     subscribers.push(subscriber)
@@ -38,16 +42,27 @@ const ReduxDevTool = (function () {
   return {
     actionLog,
     actionListener: ({ id, storeId, type, time, prevStore, store, payload }) => {
-      actionLog.push({
+      //limit array size
+      if (actionLog.length >= DevToolConfigs.maximumLines || actionLogSize >= DevToolConfigs.maximumMemory) {
+        let removedItem = actionLog.shift()
+        actionLogSize = actionLogSize - JSON.stringify(removedItem).length
+        removedItem = null
+      }
+
+      const newActionLogEntry = {
         storeId,
         actionId: id,
         type,
-        index: actionLog.length + 1,
+        index: actionLogIndex++,
         typeDisplay: type,
         time: ((time - currTime) / 1000).toFixed(3),
         payload,
         delta: type === Redux.TYPES.ACTION ? jsondiffpatch.diff(prevStore, store) : undefined,
-      })
+      }
+
+      actionLogSize += JSON.stringify(newActionLogEntry).length
+
+      actionLog.push(newActionLogEntry)
 
       subscribers.forEach(subscriber => {
         if (typeof subscriber === 'function') {
@@ -71,7 +86,12 @@ const ReduxDevTool = (function () {
       //global helper functions
       devToolWindow.setSubscriber = setSubscriber
       devToolWindow.removeSubscriber = removeSubscriber
-      devToolWindow.getActionLog = getActionLog
+      devToolWindow.getActionLog = () => actionLog
+      devToolWindow.clearActionLog = () => {
+        actionLog = []
+        actionLogIndex = 0
+        actionLogSize = 0
+      }
       devToolWindow.getDevToolConfigs = () => DevToolConfigs
       devToolWindow.setConfig = setConfig
 
@@ -94,6 +114,9 @@ const ReduxDevTool = (function () {
                         }
 
                         #ReduxDevTool {
+                          position: relative;
+                          display: flex;
+                          flex-direction: column;
                           height: 100vh;
                           width: 100vw;
                         }

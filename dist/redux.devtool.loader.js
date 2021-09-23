@@ -1,6 +1,88 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 718:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const { loadGlobal, getConstructorName, TYPES, getOperationType } = __webpack_require__(885)
+
+const getProperty = (property, source) => {
+  if (source == null) {
+    return source
+  }
+
+  return Object.prototype.hasOwnProperty.call(source, property) ? source[property] : undefined
+}
+
+const applyFunction = (func, source, i) => {
+  if (!TYPES.FUNCTION.is(func)) {
+    throw new Error(`At index ${i}: cannot apply function since it is not a Function`)
+  }
+
+  return func(source)
+}
+
+const performOperation = ({ operation, type }, source, i) =>
+  source == null
+    ? !TYPES.FUNCTION.is(type)
+      ? source
+      : applyFunction(operation, source, i)
+    : TYPES.STRING.is(type) || TYPES.NUMBER.is(type)
+    ? getProperty(operation, source)
+    : TYPES.FUNCTION.is(type)
+    ? applyFunction(operation, source, i)
+    : source
+
+//Curried version
+// prettier-ignore
+const _get = (...operationInputs) => (input) => {
+  //default return
+  if (operationInputs.length === 0) {
+    return input
+  }
+
+  const operations = [...operationInputs]
+
+  return (
+    operations
+      //operation validation
+      .map((operation, i) => {
+        const type = getOperationType(operation)
+
+        if (TYPES.INVALID.is(type)) {
+          throw new Error(
+            `Invalid Get operation at index ${i}: expecting String, Number, or Function but received ${getConstructorName(
+              operation
+            )}`
+          )
+        }
+
+        return {
+          operation,
+          type,
+        }
+      })
+      //operation execution
+      .reduce((acc, operationInfo, i) => performOperation(operationInfo, acc, i), input)
+  )
+}
+
+const defaults = defaultValue => input => {
+  return input == null ? defaultValue : input
+}
+
+const get = (input, ...operationInputs) => _get(...operationInputs)(input)
+
+module.exports._get = _get
+module.exports.defaults = defaults
+module.exports.get = get
+
+//for browser static import
+loadGlobal(module.exports)
+
+
+/***/ }),
+
 /***/ 885:
 /***/ ((module) => {
 
@@ -5159,6 +5241,8 @@ const external_Redux_namespaceObject = Redux;
 var external_Redux_default = /*#__PURE__*/__webpack_require__.n(external_Redux_namespaceObject);
 // EXTERNAL MODULE: ./node_modules/@rybr/lenses/set.js
 var set = __webpack_require__(300);
+// EXTERNAL MODULE: ./node_modules/@rybr/lenses/get.js
+var get = __webpack_require__(718);
 ;// CONCATENATED MODULE: ./src/redux.devtool.loader.js
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
@@ -5175,6 +5259,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
 
 
+
 var jsondiffpatch = __webpack_require__(311).create({}); //script data
 
 
@@ -5184,6 +5269,8 @@ var localStorageConfigId = 'ReduxDevToolConfigs';
 var DevToolConfigs = JSON.parse(localStorage.getItem(localStorageConfigId)) || {};
 DevToolConfigs.columns = DevToolConfigs.columns || {};
 DevToolConfigs.filters = DevToolConfigs.filters || {};
+DevToolConfigs.maximumLines = DevToolConfigs.maximumLines || 200;
+DevToolConfigs.maximumMemory = DevToolConfigs.maximumMemory || 10000000;
 localStorage.setItem(localStorageConfigId, JSON.stringify(DevToolConfigs));
 
 var setConfig = function setConfig(keys, value) {
@@ -5194,11 +5281,8 @@ var setConfig = function setConfig(keys, value) {
 var ReduxDevTool = function () {
   var currTime = Date.now();
   var actionLog = [];
-
-  var getActionLog = function getActionLog() {
-    return actionLog;
-  };
-
+  var actionLogIndex = 0;
+  var actionLogSize = 0;
   var subscribers = [];
 
   var setSubscriber = function setSubscriber(subscriber) {
@@ -5223,16 +5307,26 @@ var ReduxDevTool = function () {
           prevStore = _ref.prevStore,
           store = _ref.store,
           payload = _ref.payload;
-      actionLog.push({
+
+      //limit array size
+      if (actionLog.length >= DevToolConfigs.maximumLines || actionLogSize >= DevToolConfigs.maximumMemory) {
+        var removedItem = actionLog.shift();
+        actionLogSize = actionLogSize - JSON.stringify(removedItem).length;
+        removedItem = null;
+      }
+
+      var newActionLogEntry = {
         storeId: storeId,
         actionId: id,
         type: type,
-        index: actionLog.length + 1,
+        index: actionLogIndex++,
         typeDisplay: type,
         time: ((time - currTime) / 1000).toFixed(3),
         payload: payload,
         delta: type === (external_Redux_default()).TYPES.ACTION ? jsondiffpatch.diff(prevStore, store) : undefined
-      });
+      };
+      actionLogSize += JSON.stringify(newActionLogEntry).length;
+      actionLog.push(newActionLogEntry);
       subscribers.forEach(function (subscriber) {
         if (typeof subscriber === 'function') {
           subscriber(actionLog);
@@ -5249,7 +5343,16 @@ var ReduxDevTool = function () {
 
       devToolWindow.setSubscriber = setSubscriber;
       devToolWindow.removeSubscriber = removeSubscriber;
-      devToolWindow.getActionLog = getActionLog;
+
+      devToolWindow.getActionLog = function () {
+        return actionLog;
+      };
+
+      devToolWindow.clearActionLog = function () {
+        actionLog = [];
+        actionLogIndex = 0;
+        actionLogSize = 0;
+      };
 
       devToolWindow.getDevToolConfigs = function () {
         return DevToolConfigs;
@@ -5259,7 +5362,7 @@ var ReduxDevTool = function () {
 
       devToolWindow.document.querySelector('body').innerHTML = ''; //create popup DOM structure
 
-      devToolWindow.document.write("\n              <html>\n                  <head>\n                      <title>Redux Dev Tool</title>\n                      <style>\n                        html {\n                          font-family: monospace;\n                          background: #212121;\n                        }\n\n                        body {\n                          margin: 0px;\n                        }\n\n                        #ReduxDevTool {\n                          height: 100vh;\n                          width: 100vw;\n                        }\n                      </style>\n                      <script>".concat(null, "</script>\n                  </head>\n                  <body>\n                      <div id=\"ReduxDevTool\"></div>\n                      <script src=\"", data.devtoolScript, "\"></script>\n                  </body>\n              </html>\n          ")); //add stop function to main page window
+      devToolWindow.document.write("\n              <html>\n                  <head>\n                      <title>Redux Dev Tool</title>\n                      <style>\n                        html {\n                          font-family: monospace;\n                          background: #212121;\n                        }\n\n                        body {\n                          margin: 0px;\n                        }\n\n                        #ReduxDevTool {\n                          position: relative;\n                          display: flex;\n                          flex-direction: column;\n                          height: 100vh;\n                          width: 100vw;\n                        }\n                      </style>\n                      <script>".concat(null, "</script>\n                  </head>\n                  <body>\n                      <div id=\"ReduxDevTool\"></div>\n                      <script src=\"", data.devtoolScript, "\"></script>\n                  </body>\n              </html>\n          ")); //add stop function to main page window
 
       window.stopReduxDevTool = function () {
         setConfig('enablePopup', false);

@@ -571,6 +571,8 @@ var __webpack_exports__ = {};
 (() => {
 "use strict";
 
+// UNUSED EXPORTS: ActionButton
+
 ;// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/extends.js
 function extends_extends() {
   extends_extends = Object.assign || function (target) {
@@ -3354,15 +3356,24 @@ function _EMOTION_STRINGIFIED_CSS_ERROR__() {
 
 
 var PlainButton = emotion_styled_base_browser_esm("button", {
-  target: "e1iet7pr19",
+  target: "e1iet7pr21",
   label: "PlainButton"
 })( true ? {
-  name: "1irj4w2",
-  styles: "position:relative;margin:0;padding:0;outline:none;border:none;border-radius:0px;background:transparent;color:#000;font-size:0.8125rem;line-height:1.85;letter-spacing:2.6px;font-family:AzoSansRegular"
+  name: "1212f6m",
+  styles: "position:relative;margin:0;padding:0;outline:none;border:none;border-radius:0px;background:transparent;color:#000;font-size:18px;line-height:18px;letter-spacing:2.6px;font-family:'AzoSansRegular'"
 } : 0);
 
+var ActionCss = function ActionCss(props) {
+  return "\n  background: ".concat(props.inverted ? '#fff' : '#000', ";\n  border: 1px solid ").concat(props.inverted ? '#fff' : '#000', ";\n  color: ").concat(props.inverted ? '#000' : '#fff', ";\n\n  transition: background 0.15s ease-in-out, color 0.15s ease-in-out;\n\n  :hover {\n    background: ").concat(props.inverted ? '#000' : '#fff', ";\n    color: ").concat(props.inverted ? '#fff' : '#000', ";\n  }\n\n  :active {\n    background: ").concat(props.inverted ? '#fff' : '#000', ";\n    color: ").concat(props.inverted ? '#000' : '#fff', ";\n\n  }\n");
+};
+
+var ActionButton = /*#__PURE__*/emotion_styled_base_browser_esm(PlainButton, {
+  target: "e1iet7pr20",
+  label: "ActionButton"
+})(ActionCss, " padding:5px;min-width:150px;font-family:'AzoSansRegular';text-align:center;vertical-align:middle;" + ( true ? "" : 0));
+
 var Panel = emotion_styled_base_browser_esm("div", {
-  target: "e1iet7pr18",
+  target: "e1iet7pr19",
   label: "Panel"
 })( true ? {
   name: "1sgwd3j",
@@ -3370,19 +3381,27 @@ var Panel = emotion_styled_base_browser_esm("div", {
 } : 0);
 
 var Toolbar = /*#__PURE__*/emotion_styled_base_browser_esm(Panel, {
-  target: "e1iet7pr17",
+  target: "e1iet7pr18",
   label: "Toolbar"
 })( true ? {
-  name: "13dpgdn",
-  styles: "height:25px;padding:5px;overflow:auto;display:flex;flex-direction:row;align-items:center;font-size:16px;margin-bottom:0px"
+  name: "3bs21s",
+  styles: "height:25px;padding:5px;overflow:auto;display:flex;flex-direction:row;align-items:center;font-size:16px;margin-bottom:0px;flex:1 0 auto"
 } : 0);
 
 var ColumnToggles = emotion_styled_base_browser_esm("div", {
-  target: "e1iet7pr16",
+  target: "e1iet7pr17",
   label: "ColumnToggles"
 })( true ? {
   name: "ho1qnd",
   styles: "display:flex;flex-direction:row"
+} : 0);
+
+var ClearLogsButton = /*#__PURE__*/emotion_styled_base_browser_esm(ActionButton, {
+  target: "e1iet7pr16",
+  label: "ClearLogsButton"
+})( true ? {
+  name: "1mg7ez3",
+  styles: "margin-left:auto;font-size:16px"
 } : 0);
 
 var Filters = emotion_styled_base_browser_esm("div", {
@@ -3410,8 +3429,8 @@ var MainContainer = emotion_styled_base_browser_esm("div", {
   target: "e1iet7pr12",
   label: "MainContainer"
 })( true ? {
-  name: "alg2l6",
-  styles: "position:relative;display:flex;flex-direction:row;height:calc(100% - 85px)"
+  name: "tb1asp",
+  styles: "position:relative;display:flex;flex-direction:row;height:calc(100% - 85px);overflow:auto;flex:1 0 auto"
 } : 0);
 
 var ActionList = /*#__PURE__*/emotion_styled_base_browser_esm(Panel, {
@@ -3451,7 +3470,7 @@ var TableData = emotion_styled_base_browser_esm("td", {
   label: "TableData"
 })(function (props) {
   return props.isShown ? null : 'display: none;';
-}, " white-space:nowrap;max-width:200px;overflow-x:scroll;padding:3px;text-align:left;border:1px solid #909090;color:white;" + ( true ? "" : 0));
+}, " white-space:nowrap;max-width:200px;overflow-x:scroll;padding:5px;text-align:left;border:1px solid #909090;color:white;" + ( true ? "" : 0));
 
 var ActionDiff = emotion_styled_base_browser_esm("div", {
   target: "e1iet7pr6",
@@ -3473,8 +3492,8 @@ var TabContainer = /*#__PURE__*/emotion_styled_base_browser_esm(Panel, {
   target: "e1iet7pr4",
   label: "TabContainer"
 })( true ? {
-  name: "18fncqy",
-  styles: "width:100%;display:flex;flex-direction:column;margin-left:0px;overflow:auto"
+  name: "1rl640y",
+  styles: "width:100%;min-width:500px;display:flex;flex-direction:column;margin-left:0px;overflow:auto"
 } : 0);
 
 var TabSelectors = emotion_styled_base_browser_esm("div", {
@@ -3515,16 +3534,21 @@ var createTabs = function createTabs(tabsData) {
 
   var _tabsData$reduce = tabsData.reduce(function (acc, _ref, i) {
     var name = _ref.name,
-        content = _ref.content;
-    acc.selectors.push( /*#__PURE__*/_jsx(TabSelector, {
-      isSelected: selectedTabIndex === i,
-      onClick: function onClick() {
-        return setSelectedTabIndex(i);
-      }
-    }, "tab-selector-".concat(i), name));
-    acc.contents.push( /*#__PURE__*/_jsx(Tab, {
-      isSelected: selectedTabIndex === i
-    }, "tab-content-".concat(i), content));
+        content = _ref.content,
+        isShown = _ref.isShown;
+
+    if (isShown) {
+      acc.selectors.push( /*#__PURE__*/_jsx(TabSelector, {
+        isSelected: selectedTabIndex === i,
+        onClick: function onClick() {
+          return setSelectedTabIndex(i);
+        }
+      }, "tab-selector-".concat(i), name));
+      acc.contents.push( /*#__PURE__*/_jsx(Tab, {
+        isSelected: selectedTabIndex === i
+      }, "tab-content-".concat(i), content));
+    }
+
     return acc;
   }, {
     selectors: [],
@@ -3614,6 +3638,11 @@ var ReduxDevTool = function ReduxDevTool() {
       payload = _React$useState16[0],
       setPayload = _React$useState16[1];
 
+  var _React$useState17 = external_React_default().useState(true),
+      _React$useState18 = _slicedToArray(_React$useState17, 2),
+      showDiffTab = _React$useState18[0],
+      setShowDiffTab = _React$useState18[1];
+
   external_React_default().useEffect(function () {
     var actionListener = actionListener;
 
@@ -3646,7 +3675,12 @@ var ReduxDevTool = function ReduxDevTool() {
         setColumns(getColumns());
       }
     }, "".concat(key, "-configs-").concat(i)), name);
-  })), /*#__PURE__*/_jsx(Filters, {}, void 0, Object.values(typeFilters).map(function (_ref6, i) {
+  })), /*#__PURE__*/_jsx(ClearLogsButton, {
+    onClick: function onClick() {
+      window.clearActionLog();
+      setActionLogs(window.getActionLog().slice(0));
+    }
+  }, void 0, "Clear Logs"), /*#__PURE__*/_jsx(Filters, {}, void 0, Object.values(typeFilters).map(function (_ref6, i) {
     var name = _ref6.name,
         key = _ref6.key,
         isShown = _ref6.isShown;
@@ -3688,9 +3722,15 @@ var ReduxDevTool = function ReduxDevTool() {
   }))), /*#__PURE__*/_jsx("tbody", {}, void 0, actionLogs.map(function (rowData, index) {
     return /*#__PURE__*/_jsx(TableRow, {
       onClick: function onClick() {
-        console.log(window.jsondiffpatch);
-        setActionDiffHtml(format(rowData.delta));
-        setPayload(JSON.stringify(rowData.payload, null, 2));
+        if (rowData.typeDisplay === (external_Redux_default()).TYPES.ACTION) {
+          setActionDiffHtml(format(rowData.delta));
+          setShowDiffTab(true);
+        } else if (rowData.typeDisplay === (external_Redux_default()).TYPES.EPIC) {
+          setActionDiffHtml('');
+          setShowDiffTab(false);
+        }
+
+        setPayload("".concat(JSON.stringify(rowData.payload, null, 2)));
         setSelectedIndex(index);
       },
       isSelected: index === selectedIndex,
@@ -3704,6 +3744,7 @@ var ReduxDevTool = function ReduxDevTool() {
     }));
   })))), createTabs([{
     name: 'Diff',
+    isShown: showDiffTab,
     content: /*#__PURE__*/_jsx(ActionDiff, {
       dangerouslySetInnerHTML: {
         __html: actionDiffHtml
@@ -3711,6 +3752,7 @@ var ReduxDevTool = function ReduxDevTool() {
     })
   }, {
     name: 'Payload',
+    isShown: true,
     content: /*#__PURE__*/_jsx(Payload, {}, void 0, payload)
   }])));
 };

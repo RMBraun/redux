@@ -17,10 +17,38 @@ const PlainButton = styled.button`
   border-radius: 0px;
   background: transparent;
   color: #000;
-  font-size: 0.8125rem;
-  line-height: 1.85;
+  font-size: 18px;
+  line-height: 18px;
   letter-spacing: 2.6px;
-  font-family: AzoSansRegular;
+  font-family: 'AzoSansRegular';
+`
+
+const ActionCss = props => `
+  background: ${props.inverted ? '#fff' : '#000'};
+  border: 1px solid ${props.inverted ? '#fff' : '#000'};
+  color: ${props.inverted ? '#000' : '#fff'};
+
+  transition: background 0.15s ease-in-out, color 0.15s ease-in-out;
+
+  :hover {
+    background: ${props.inverted ? '#000' : '#fff'};
+    color: ${props.inverted ? '#fff' : '#000'};
+  }
+
+  :active {
+    background: ${props.inverted ? '#fff' : '#000'};
+    color: ${props.inverted ? '#000' : '#fff'};
+
+  }
+`
+
+export const ActionButton = styled(PlainButton)`
+  ${ActionCss}
+  padding: 5px;
+  min-width: 150px;
+  font-family: 'AzoSansRegular';
+  text-align: center;
+  vertical-align: middle;
 `
 
 const Panel = styled.div`
@@ -40,11 +68,17 @@ const Toolbar = styled(Panel)`
   align-items: center;
   font-size: 16px;
   margin-bottom: 0px;
+  flex: 1 0 auto;
 `
 
 const ColumnToggles = styled.div`
   display: flex;
   flex-direction: row;
+`
+
+const ClearLogsButton = styled(ActionButton)`
+  margin-left: auto;
+  font-size: 16px;
 `
 
 const Filters = styled.div`
@@ -66,6 +100,8 @@ const MainContainer = styled.div`
   display: flex;
   flex-direction: row;
   height: calc(100% - 85px);
+  overflow: auto;
+  flex: 1 0 auto;
 `
 
 const ActionList = styled(Panel)`
@@ -113,7 +149,7 @@ const TableData = styled.td`
   white-space: nowrap;
   max-width: 200px;
   overflow-x: scroll;
-  padding: 3px;
+  padding: 5px;
   text-align: left;
   border: 1px solid #909090;
   color: white;
@@ -132,6 +168,7 @@ const Payload = styled.div`
 
 const TabContainer = styled(Panel)`
   width: 100%;
+  min-width: 500px;
   display: flex;
   flex-direction: column;
   margin-left: 0px;
@@ -178,22 +215,24 @@ const createTabs = tabsData => {
   const [selectedTabIndex, setSelectedTabIndex] = React.useState(0)
 
   const { selectors, contents } = tabsData.reduce(
-    (acc, { name, content }, i) => {
-      acc.selectors.push(
-        <TabSelector
-          key={`tab-selector-${i}`}
-          isSelected={selectedTabIndex === i}
-          onClick={() => setSelectedTabIndex(i)}
-        >
-          {name}
-        </TabSelector>
-      )
+    (acc, { name, content, isShown }, i) => {
+      if (isShown) {
+        acc.selectors.push(
+          <TabSelector
+            key={`tab-selector-${i}`}
+            isSelected={selectedTabIndex === i}
+            onClick={() => setSelectedTabIndex(i)}
+          >
+            {name}
+          </TabSelector>
+        )
 
-      acc.contents.push(
-        <Tab key={`tab-content-${i}`} isSelected={selectedTabIndex === i}>
-          {content}
-        </Tab>
-      )
+        acc.contents.push(
+          <Tab key={`tab-content-${i}`} isSelected={selectedTabIndex === i}>
+            {content}
+          </Tab>
+        )
+      }
 
       return acc
     },
@@ -256,6 +295,7 @@ const ReduxDevTool = () => {
   const [actionLogs, setActionLogs] = React.useState(actionLogSnapshot)
   const [actionDiffHtml, setActionDiffHtml] = React.useState('')
   const [payload, setPayload] = React.useState('')
+  const [showDiffTab, setShowDiffTab] = React.useState(true)
 
   React.useEffect(() => {
     let actionListener = actionListener
@@ -295,6 +335,14 @@ const ReduxDevTool = () => {
             </CheckBoxLabel>
           ))}
         </ColumnToggles>
+        <ClearLogsButton
+          onClick={() => {
+            window.clearActionLog()
+            setActionLogs(window.getActionLog().slice(0))
+          }}
+        >
+          Clear Logs
+        </ClearLogsButton>
         <Filters>
           {Object.values(typeFilters).map(({ name, key, isShown }, i) => (
             <CheckBoxLabel htmlFor={name}>
@@ -349,9 +397,15 @@ const ReduxDevTool = () => {
                 <TableRow
                   key={index}
                   onClick={() => {
-                    console.log(window.jsondiffpatch)
-                    setActionDiffHtml(htmlDeltaFormatter(rowData.delta))
-                    setPayload(JSON.stringify(rowData.payload, null, 2))
+                    if (rowData.typeDisplay === Redux.TYPES.ACTION) {
+                      setActionDiffHtml(htmlDeltaFormatter(rowData.delta))
+                      setShowDiffTab(true)
+                    } else if (rowData.typeDisplay === Redux.TYPES.EPIC) {
+                      setActionDiffHtml('')
+                      setShowDiffTab(false)
+                    }
+
+                    setPayload(`${JSON.stringify(rowData.payload, null, 2)}`)
                     setSelectedIndex(index)
                   }}
                   isSelected={index === selectedIndex}
@@ -368,8 +422,12 @@ const ReduxDevTool = () => {
           </ActionListTable>
         </ActionList>
         {createTabs([
-          { name: 'Diff', content: <ActionDiff dangerouslySetInnerHTML={{ __html: actionDiffHtml }} /> },
-          { name: 'Payload', content: <Payload>{payload}</Payload> },
+          {
+            name: 'Diff',
+            isShown: showDiffTab,
+            content: <ActionDiff dangerouslySetInnerHTML={{ __html: actionDiffHtml }} />,
+          },
+          { name: 'Payload', isShown: true, content: <Payload>{payload}</Payload> },
         ])}
       </MainContainer>
     </>

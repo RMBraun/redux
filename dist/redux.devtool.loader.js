@@ -5260,10 +5260,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
 
 
-var jsondiffpatch = __webpack_require__(311).create({}); //script data
+var jsondiffpatch = __webpack_require__(311).create({}); //initialize and get redux dev tool config values
 
-
-var data = document.currentScript.dataset; //initialize and get redux dev tool config values
 
 var localStorageConfigId = 'ReduxDevToolConfigs';
 var DevToolConfigs = JSON.parse(localStorage.getItem(localStorageConfigId)) || {};
@@ -5362,7 +5360,7 @@ var ReduxDevTool = function () {
 
       devToolWindow.document.querySelector('body').innerHTML = ''; //create popup DOM structure
 
-      devToolWindow.document.write("\n              <html>\n                  <head>\n                      <title>Redux Dev Tool</title>\n                      <style>\n                        html {\n                          font-family: monospace;\n                          background: #212121;\n                        }\n\n                        body {\n                          margin: 0px;\n                        }\n\n                        #ReduxDevTool {\n                          position: relative;\n                          display: flex;\n                          flex-direction: column;\n                          height: 100vh;\n                          width: 100vw;\n                        }\n                      </style>\n                      <script>".concat(null, "</script>\n                  </head>\n                  <body>\n                      <div id=\"ReduxDevTool\"></div>\n                      <script src=\"", data.devtoolScript, "\"></script>\n                  </body>\n              </html>\n          ")); //add stop function to main page window
+      devToolWindow.document.write("\n              <html>\n                  <head>\n                      <title>Redux Dev Tool</title>\n                      <style>\n                        html {\n                          font-family: monospace;\n                          background: #212121;\n                        }\n\n                        body {\n                          margin: 0px;\n                        }\n\n                        #ReduxDevTool {\n                          position: relative;\n                          display: flex;\n                          flex-direction: column;\n                          height: 100vh;\n                          width: 100vw;\n                        }\n                      </style>\n                      <script>".concat(null, "</script>\n                  </head>\n                  <body>\n                      <div id=\"ReduxDevTool\"></div>\n                      <script src=\"", document.currentScript.dataset.devtoolScript, "\"></script>\n                  </body>\n              </html>\n          ")); //add stop function to main page window
 
       window.stopReduxDevTool = function () {
         setConfig('enablePopup', false);
@@ -5382,7 +5380,7 @@ window.addEventListener('beforeunload', function () {
   external_Redux_default().removeActionListener(ReduxDevTool.actionListener);
   window.closeReduxDevTool();
 });
-console.log('Redux dev tool loaded');
+console.log('Redux dev tool loaded', document.currentScript);
 
 if (DevToolConfigs.enablePopup) {
   ReduxDevTool.startReduxDevTool();

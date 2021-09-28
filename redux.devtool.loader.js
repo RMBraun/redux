@@ -4,6 +4,9 @@ import { get } from '@rybr/lenses/get'
 
 const jsondiffpatch = require('jsondiffpatch').create({})
 
+//snapshot script data
+const dataset = document.currentScript.dataset
+
 //initialize and get redux dev tool config values
 const localStorageConfigId = 'ReduxDevToolConfigs'
 const DevToolConfigs = JSON.parse(localStorage.getItem(localStorageConfigId)) || {}
@@ -118,11 +121,10 @@ const ReduxDevTool = (function () {
                           width: 100vw;
                         }
                       </style>
-                      <script>${null}</script>
                   </head>
                   <body>
                       <div id="ReduxDevTool"></div>
-                      <script src="${document.currentScript.dataset.devtoolScript}"></script>
+                      <script src="${dataset.devtoolScript}"></script>
                   </body>
               </html>
           `)

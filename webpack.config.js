@@ -4,14 +4,13 @@ const glob = require('glob')
 const baseConfig = {
   mode: 'production',
   name: 'redux',
-  entry: [...glob.sync(path.join(__dirname, 'src', '*.js')), ...glob.sync(path.join(__dirname, 'src', '*.jsx'))].reduce(
-    (entries, source) => {
+  entry: [...glob.sync(path.join(__dirname, '*.js')), ...glob.sync(path.join(__dirname, '*.jsx'))]
+    .filter(source => !source.includes('webpack.config'))
+    .reduce((entries, source) => {
       entries[path.basename(source).replace('.jsx', '').replace('.js', '')] = source
 
       return entries
-    },
-    {}
-  ),
+    }, {}),
   externals: {
     // Use external version of React
     react: 'React',

@@ -1,4 +1,4 @@
-import { clone } from '../utils'
+import { clone } from './utils'
 
 const TYPES = {
   EPIC: 'Epic',

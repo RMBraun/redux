@@ -8,7 +8,7 @@ var __webpack_exports__ = {};
 const external_React_namespaceObject = React;
 ;// CONCATENATED MODULE: external "Redux"
 const external_Redux_namespaceObject = Redux;
-;// CONCATENATED MODULE: ./src/listener.jsx
+;// CONCATENATED MODULE: ./listener.jsx
 function _extends() {
   _extends = Object.assign || function (target) {
     for (var i = 1; i < arguments.length; i++) {

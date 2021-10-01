@@ -1,33 +1,44 @@
 import { clone } from './utils'
 
-const TYPES = {
+export const TYPES = {
   EPIC: 'Epic',
   ACTION: 'Action',
+  DELAYED_ACTION: 'DelayedAction',
 }
 export default class Redux {
+  #listeners
+  #store
+  #actionListeners
+  #actions
+  #epics
+  static #instance
+
   constructor() {
-    this.enableDebug = false
-    this.listeners = []
-    this.store = {}
-    this.actionListeners = []
-    this.actions = {}
-    this.epics = {}
+    this.#listeners = []
+    this.#store = {}
+    this.#actionListeners = []
+    this.#actions = {}
+    this.#epics = {}
   }
 
-  static getInstance() {
-    if (Redux.instance == null) {
-      Redux.instance = new Redux()
+  static #getInstance() {
+    if (Redux.#instance == null) {
+      Redux.#instance = new Redux()
     }
 
-    return Redux.instance
+    return Redux.#instance
+  }
+
+  static getStore(reduxId) {
+    return clone(reduxId ? Redux.#getInstance().#store[reduxId] : Redux.#getInstance().#store)
   }
 
   static getActions(reduxId) {
-    return reduxId == null ? Redux.getInstance().actions : Redux.getInstance().actions[reduxId]
+    return reduxId == null ? Redux.#getInstance().#actions : Redux.#getInstance().#actions[reduxId]
   }
 
   static getEpics() {
-    return Redux.getInstance().epics
+    return Redux.#getInstance().#epics
   }
 
   static init(initialState = {}, defaultState = {}) {
@@ -37,12 +48,12 @@ export default class Redux {
       )
     }
 
-    Object.assign(Redux.getInstance().store, defaultState, initialState)
+    Object.assign(Redux.#getInstance().#store, defaultState, initialState)
   }
 
   static initChangeListener(pickerFunc) {
     const propSelectFunction = newStore => (pickerFunc || (a => a))(newStore) || {}
-    const getInitialState = () => propSelectFunction(clone(Redux.getInstance().store))
+    const getInitialState = () => propSelectFunction(clone(Redux.#getInstance().#store))
 
     return {
       propSelectFunction,
@@ -52,17 +63,17 @@ export default class Redux {
 
   static addChangeListener(changeListener) {
     if (typeof changeListener === 'function') {
-      Redux.getInstance().listeners.push(changeListener)
+      Redux.#getInstance().#listeners.push(changeListener)
     } else {
       throw new Error('Change listener must be of type function')
     }
   }
 
   static removeChangeListener(changeListener) {
-    const index = Redux.getInstance().listeners.indexOf(changeListener)
+    const index = Redux.#getInstance().#listeners.indexOf(changeListener)
 
     if (index !== -1) {
-      Redux.getInstance().listeners.splice(index, 1)
+      Redux.#getInstance().#listeners.splice(index, 1)
     }
   }
 
@@ -95,7 +106,7 @@ export default class Redux {
   static addActionListener(changeListener) {
     const type = changeListener && changeListener.constructor && changeListener.constructor.name
     if (type === Function.name) {
-      Redux.getInstance().actionListeners.push(changeListener)
+      Redux.#getInstance().#actionListeners.push(changeListener)
     } else if (type === Object.name) {
       Object.entries(changeListener).forEach(([key, callback]) => {
         if (callback == null) {
@@ -103,7 +114,7 @@ export default class Redux {
         }
       })
 
-      Redux.getInstance().actionListeners.push(info => {
+      Redux.#getInstance().#actionListeners.push(info => {
         const listenerForId = changeListener[info.id]
         if (listenerForId && listenerForId.constructor && listenerForId.constructor.name === Function.name) {
           listenerForId(info)
@@ -138,7 +149,7 @@ export default class Redux {
         ids: listener.ids.map(id => id.toString()),
       }))
 
-      Redux.getInstance().actionListeners.push(info => {
+      Redux.#getInstance().#actionListeners.push(info => {
         formattedChangeListener.forEach(({ ids, callback }) => {
           if (ids.includes(info.id)) {
             callback(info)
@@ -151,17 +162,17 @@ export default class Redux {
   }
 
   static removeActionListener(changeListener) {
-    const index = Redux.getInstance().actionListeners.indexOf(changeListener)
+    const index = Redux.#getInstance().#actionListeners.indexOf(changeListener)
 
     if (index !== -1) {
-      Redux.getInstance().actionListeners.splice(index, 1)
+      Redux.#getInstance().#actionListeners.splice(index, 1)
     }
   }
 
-  static updateState(newStore = {}) {
-    Object.assign(Redux.getInstance().store, newStore)
+  static #updateState(newStore = {}) {
+    Object.assign(Redux.#getInstance().#store, newStore)
 
-    Redux.getInstance().listeners.forEach(listener => {
+    Redux.#getInstance().#listeners.forEach(listener => {
       if (typeof listener === 'function') {
         listener(newStore)
       }
@@ -175,13 +186,13 @@ export default class Redux {
 
     const actionId = func.name || actionName
 
-    const action = function (payload) {
+    const action = function (payload, customStore) {
       //get new store
       //important to send a clone to prevent any possible data mutations
-      const newStore = func(clone(Redux.getInstance().store), payload)
+      const newStore = func(clone(customStore || Redux.#getInstance().#store), payload)
 
       //send new action log to listeners
-      Redux.getInstance().actionListeners.forEach(actionListener => {
+      Redux.#getInstance().#actionListeners.forEach(actionListener => {
         if (typeof actionListener === 'function') {
           actionListener({
             id: actionId,
@@ -189,25 +200,31 @@ export default class Redux {
             type: TYPES.ACTION,
             time: Date.now(),
             payload,
-            prevStore: clone(Redux.getInstance().store),
+            prevStore: clone(Redux.#getInstance().#store),
             store: clone(newStore),
           })
         }
       })
 
-      //update current store and notify everyone
-      Redux.updateState(newStore)
+      if (!customStore) {
+        //update current global store and notify everyone
+        Redux.#updateState(newStore)
+      } else {
+        //return the new store
+        return newStore
+      }
     }
 
     //add prototype toString so that it resolves to the actionId
+    action.type = TYPES.ACTION
     action.toString = () => actionId
     action.prototype.toString = () => actionId
 
     //snapshot action
-    Redux.getInstance().actions[reduxId] = Redux.getInstance().actions[reduxId] || {}
+    Redux.#getInstance().#actions[reduxId] = Redux.#getInstance().#actions[reduxId] || {}
 
-    if (Redux.getInstance().actions[reduxId][actionId] == null) {
-      Redux.getInstance().actions[reduxId][actionId] = action
+    if (Redux.#getInstance().#actions[reduxId][actionId] == null) {
+      Redux.#getInstance().#actions[reduxId][actionId] = action
     } else {
       throw new Error(`An Action with the name ${actionId} already exists for redux ${reduxId}`)
     }
@@ -237,7 +254,7 @@ export default class Redux {
 
     const epic = payload => {
       //send new action log to listeners
-      Redux.getInstance().actionListeners.forEach(actionListener => {
+      Redux.#getInstance().#actionListeners.forEach(actionListener => {
         if (typeof actionListener === 'function') {
           actionListener({
             id: epicId,
@@ -245,20 +262,20 @@ export default class Redux {
             type: TYPES.EPIC,
             time: Date.now(),
             payload,
-            store: clone(Redux.getInstance().store),
+            store: clone(Redux.#getInstance().#store),
           })
         }
       })
 
       //important to send a clone to prevent any possible data mutations
-      func(clone(Redux.getInstance().store), payload)
+      func(clone(Redux.#getInstance().#store), payload)
     }
 
     //snapshot epic
-    Redux.getInstance().epics[reduxId] = Redux.getInstance().epics[reduxId] || {}
+    Redux.#getInstance().#epics[reduxId] = Redux.#getInstance().#epics[reduxId] || {}
 
-    if (Redux.getInstance().epics[reduxId][epicId] == null) {
-      Redux.getInstance().epics[reduxId][epicId] = epic
+    if (Redux.#getInstance().#epics[reduxId][epicId] == null) {
+      Redux.#getInstance().#epics[reduxId][epicId] = epic
     } else {
       throw new Error(`An Epic with the name ${epicId} already exists for redux ${reduxId}`)
     }
@@ -278,48 +295,57 @@ export default class Redux {
       ])
     )
   }
+
+  static callAction(reduxId, actionId, payload, { isDelayed = false } = {}) {
+    const allActions = Redux.#getInstance().#actions
+    const reduxActions = allActions && allActions[reduxId]
+    const action = reduxActions && reduxActions[actionId]
+
+    if (typeof action !== 'function' && action.type !== TYPES.ACTION) {
+      console.warn(`The action ${actionId} is not a function for store ${reduxId}`)
+      return
+    }
+
+    if (isDelayed) {
+      const delayedAction = function (customStore) {
+        return action(payload, customStore)
+      }
+      delayedAction.type = TYPES.DELAYED_ACTION
+
+      return delayedAction
+    } else {
+      action(payload)
+    }
+  }
+
+  static delayAction(reduxId, actionId, payload) {
+    return Redux.callAction(reduxId, actionId, payload, { isDelayed: true })
+  }
+
+  static callActions(actions) {
+    const newStore = [].concat(actions).reduce((acc, delayedAction) => {
+      if (typeof delayedAction !== 'function' || delayedAction.type !== TYPES.DELAYED_ACTION) {
+        throw new Error('Invalid Action recieved in CallActions. Expecting a Delayed Action')
+      }
+
+      return Object.assign(acc, delayedAction(acc) || {})
+    }, Redux.#getInstance().#store)
+
+    //update current store and notify everyone
+    Redux.#updateState(newStore)
+  }
+
+  static callEpic(reduxId, epicId, payload) {
+    const allEpics = Redux.#getInstance().#epics
+    const reduxEpics = allEpics && allEpics[reduxId]
+    const epic = reduxEpics && reduxEpics[epicId]
+
+    if (typeof epic === 'function' && epic.type === TYPES.EPIC) {
+      epic(payload)
+    } else {
+      console.warn(`The epic ${epicId} is not a function for store ${reduxId}`)
+    }
+  }
 }
 
 Redux.init()
-
-//for global browser import
-if (typeof window !== 'undefined') {
-  window.Redux = {
-    TYPES,
-    init: Redux.init,
-    initChangeListener: Redux.initChangeListener,
-    addChangeListener: Redux.addChangeListener,
-    removeChangeListener: Redux.removeChangeListener,
-    addActionListener: Redux.addActionListener,
-    removeActionListener: Redux.removeActionListener,
-    createActions: Redux.createActions,
-    createEpics: Redux.createEpics,
-    getStore: function (reduxId) {
-      return clone(reduxId ? Redux.getInstance().store[reduxId] : Redux.getInstance().store)
-    },
-    getActions: Redux.getActions,
-    getEpics: Redux.getEpics,
-    callAction: (reduxId, actionId, payload) => {
-      const allActions = Redux.getActions()
-      const reduxActions = allActions && allActions[reduxId]
-      const action = reduxActions && reduxActions[actionId]
-
-      if (typeof action === 'function') {
-        action(payload)
-      } else {
-        console.warn(`The action ${actionId} is not a function`)
-      }
-    },
-    callEpic: (reduxId, epicId, payload) => {
-      const allEpics = Redux.getEpics()
-      const reduxEpics = allEpics && allEpics[reduxId]
-      const epic = reduxEpics && reduxEpics[epicId]
-
-      if (typeof epic === 'function') {
-        epic(payload)
-      } else {
-        console.warn(`The epic ${epicId} is not a function`)
-      }
-    },
-  }
-}

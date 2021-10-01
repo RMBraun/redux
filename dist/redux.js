@@ -41,43 +41,14 @@ module.exports = {
 /******/ 	}
 /******/ 	
 /************************************************************************/
-/******/ 	/* webpack/runtime/compat get default export */
-/******/ 	(() => {
-/******/ 		// getDefaultExport function for compatibility with non-harmony modules
-/******/ 		__webpack_require__.n = (module) => {
-/******/ 			var getter = module && module.__esModule ?
-/******/ 				() => (module['default']) :
-/******/ 				() => (module);
-/******/ 			__webpack_require__.d(getter, { a: getter });
-/******/ 			return getter;
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/define property getters */
-/******/ 	(() => {
-/******/ 		// define getter functions for harmony exports
-/******/ 		__webpack_require__.d = (exports, definition) => {
-/******/ 			for(var key in definition) {
-/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
-/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
-/******/ 				}
-/******/ 			}
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
-/******/ 	(() => {
-/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
-/******/ 	})();
-/******/ 	
-/************************************************************************/
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be in strict mode.
 (() => {
 "use strict";
-/* unused harmony export default */
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(456);
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_utils__WEBPACK_IMPORTED_MODULE_0__);
+
+// EXTERNAL MODULE: ./utils.js
+var utils = __webpack_require__(456);
+;// CONCATENATED MODULE: ./redux.js
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -104,42 +75,97 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+function _classPrivateFieldGet(receiver, privateMap) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
+
+function _classStaticPrivateMethodGet(receiver, classConstructor, method) { _classCheckPrivateStaticAccess(receiver, classConstructor); return method; }
+
+function _classStaticPrivateFieldSpecSet(receiver, classConstructor, descriptor, value) { _classCheckPrivateStaticAccess(receiver, classConstructor); _classCheckPrivateStaticFieldDescriptor(descriptor, "set"); _classApplyDescriptorSet(receiver, descriptor, value); return value; }
+
+function _classStaticPrivateFieldSpecGet(receiver, classConstructor, descriptor) { _classCheckPrivateStaticAccess(receiver, classConstructor); _classCheckPrivateStaticFieldDescriptor(descriptor, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
+
+function _classCheckPrivateStaticFieldDescriptor(descriptor, action) { if (descriptor === undefined) { throw new TypeError("attempted to " + action + " private static field before its declaration"); } }
+
+function _classCheckPrivateStaticAccess(receiver, classConstructor) { if (receiver !== classConstructor) { throw new TypeError("Private static access of wrong provenance"); } }
+
+function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
+
+function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "set"); _classApplyDescriptorSet(receiver, descriptor, value); return value; }
+
+function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
+
+function _classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } }
+
 
 var TYPES = {
   EPIC: 'Epic',
-  ACTION: 'Action'
+  ACTION: 'Action',
+  DELAYED_ACTION: 'DelayedAction'
 };
+
+var _listeners = /*#__PURE__*/new WeakMap();
+
+var _store = /*#__PURE__*/new WeakMap();
+
+var _actionListeners = /*#__PURE__*/new WeakMap();
+
+var _actions = /*#__PURE__*/new WeakMap();
+
+var _epics = /*#__PURE__*/new WeakMap();
 
 var Redux = /*#__PURE__*/function () {
   function Redux() {
     _classCallCheck(this, Redux);
 
-    this.enableDebug = false;
-    this.listeners = [];
-    this.store = {};
-    this.actionListeners = [];
-    this.actions = {};
-    this.epics = {};
+    _listeners.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _store.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _actionListeners.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _actions.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _epics.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _classPrivateFieldSet(this, _listeners, []);
+
+    _classPrivateFieldSet(this, _store, {});
+
+    _classPrivateFieldSet(this, _actionListeners, []);
+
+    _classPrivateFieldSet(this, _actions, {});
+
+    _classPrivateFieldSet(this, _epics, {});
   }
 
   _createClass(Redux, null, [{
-    key: "getInstance",
-    value: function getInstance() {
-      if (Redux.instance == null) {
-        Redux.instance = new Redux();
-      }
-
-      return Redux.instance;
+    key: "getStore",
+    value: function getStore(reduxId) {
+      return (0,utils.clone)(reduxId ? _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)[reduxId] : _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store));
     }
   }, {
     key: "getActions",
     value: function getActions(reduxId) {
-      return reduxId == null ? Redux.getInstance().actions : Redux.getInstance().actions[reduxId];
+      return reduxId == null ? _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actions) : _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actions)[reduxId];
     }
   }, {
     key: "getEpics",
     value: function getEpics() {
-      return Redux.getInstance().epics;
+      return _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _epics);
     }
   }, {
     key: "init",
@@ -151,7 +177,7 @@ var Redux = /*#__PURE__*/function () {
         throw new Error("Redux initial state must be an object ({}) but recieved ".concat(initialState && initialState.constructor));
       }
 
-      Object.assign(Redux.getInstance().store, defaultState, initialState);
+      Object.assign(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store), defaultState, initialState);
     }
   }, {
     key: "initChangeListener",
@@ -163,7 +189,7 @@ var Redux = /*#__PURE__*/function () {
       };
 
       var getInitialState = function getInitialState() {
-        return propSelectFunction((0,_utils__WEBPACK_IMPORTED_MODULE_0__.clone)(Redux.getInstance().store));
+        return propSelectFunction((0,utils.clone)(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)));
       };
 
       return {
@@ -175,7 +201,7 @@ var Redux = /*#__PURE__*/function () {
     key: "addChangeListener",
     value: function addChangeListener(changeListener) {
       if (typeof changeListener === 'function') {
-        Redux.getInstance().listeners.push(changeListener);
+        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _listeners).push(changeListener);
       } else {
         throw new Error('Change listener must be of type function');
       }
@@ -183,10 +209,10 @@ var Redux = /*#__PURE__*/function () {
   }, {
     key: "removeChangeListener",
     value: function removeChangeListener(changeListener) {
-      var index = Redux.getInstance().listeners.indexOf(changeListener);
+      var index = _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _listeners).indexOf(changeListener);
 
       if (index !== -1) {
-        Redux.getInstance().listeners.splice(index, 1);
+        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _listeners).splice(index, 1);
       }
     }
     /*
@@ -219,7 +245,7 @@ var Redux = /*#__PURE__*/function () {
       var type = changeListener && changeListener.constructor && changeListener.constructor.name;
 
       if (type === Function.name) {
-        Redux.getInstance().actionListeners.push(changeListener);
+        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).push(changeListener);
       } else if (type === Object.name) {
         Object.entries(changeListener).forEach(function (_ref) {
           var _ref2 = _slicedToArray(_ref, 2),
@@ -230,7 +256,8 @@ var Redux = /*#__PURE__*/function () {
             throw new Error("Action listener for ".concat(key, " cannot be null"));
           }
         });
-        Redux.getInstance().actionListeners.push(function (info) {
+
+        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).push(function (info) {
           var listenerForId = changeListener[info.id];
 
           if (listenerForId && listenerForId.constructor && listenerForId.constructor.name === Function.name) {
@@ -264,7 +291,8 @@ var Redux = /*#__PURE__*/function () {
             })
           });
         });
-        Redux.getInstance().actionListeners.push(function (info) {
+
+        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).push(function (info) {
           formattedChangeListener.forEach(function (_ref3) {
             var ids = _ref3.ids,
                 callback = _ref3.callback;
@@ -281,22 +309,11 @@ var Redux = /*#__PURE__*/function () {
   }, {
     key: "removeActionListener",
     value: function removeActionListener(changeListener) {
-      var index = Redux.getInstance().actionListeners.indexOf(changeListener);
+      var index = _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).indexOf(changeListener);
 
       if (index !== -1) {
-        Redux.getInstance().actionListeners.splice(index, 1);
+        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).splice(index, 1);
       }
-    }
-  }, {
-    key: "updateState",
-    value: function updateState() {
-      var newStore = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-      Object.assign(Redux.getInstance().store, newStore);
-      Redux.getInstance().listeners.forEach(function (listener) {
-        if (typeof listener === 'function') {
-          listener(newStore);
-        }
-      });
     }
   }, {
     key: "createAction",
@@ -309,12 +326,12 @@ var Redux = /*#__PURE__*/function () {
 
       var actionId = func.name || actionName;
 
-      var action = function action(payload) {
+      var action = function action(payload, customStore) {
         //get new store
         //important to send a clone to prevent any possible data mutations
-        var newStore = func((0,_utils__WEBPACK_IMPORTED_MODULE_0__.clone)(Redux.getInstance().store), payload); //send new action log to listeners
+        var newStore = func((0,utils.clone)(customStore || _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)), payload); //send new action log to listeners
 
-        Redux.getInstance().actionListeners.forEach(function (actionListener) {
+        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).forEach(function (actionListener) {
           if (typeof actionListener === 'function') {
             actionListener({
               id: actionId,
@@ -322,15 +339,23 @@ var Redux = /*#__PURE__*/function () {
               type: TYPES.ACTION,
               time: Date.now(),
               payload: payload,
-              prevStore: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.clone)(Redux.getInstance().store),
-              store: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.clone)(newStore)
+              prevStore: (0,utils.clone)(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)),
+              store: (0,utils.clone)(newStore)
             });
           }
-        }); //update current store and notify everyone
+        });
 
-        Redux.updateState(newStore);
+        if (!customStore) {
+          //update current global store and notify everyone
+          _classStaticPrivateMethodGet(Redux, Redux, _updateState).call(Redux, newStore);
+        } else {
+          //return the new store
+          return newStore;
+        }
       }; //add prototype toString so that it resolves to the actionId
 
+
+      action.type = TYPES.ACTION;
 
       action.toString = function () {
         return actionId;
@@ -341,10 +366,10 @@ var Redux = /*#__PURE__*/function () {
       }; //snapshot action
 
 
-      Redux.getInstance().actions[reduxId] = Redux.getInstance().actions[reduxId] || {};
+      _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actions)[reduxId] = _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actions)[reduxId] || {};
 
-      if (Redux.getInstance().actions[reduxId][actionId] == null) {
-        Redux.getInstance().actions[reduxId][actionId] = action;
+      if (_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actions)[reduxId][actionId] == null) {
+        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actions)[reduxId][actionId] = action;
       } else {
         throw new Error("An Action with the name ".concat(actionId, " already exists for redux ").concat(reduxId));
       }
@@ -379,7 +404,7 @@ var Redux = /*#__PURE__*/function () {
 
       var epic = function epic(payload) {
         //send new action log to listeners
-        Redux.getInstance().actionListeners.forEach(function (actionListener) {
+        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).forEach(function (actionListener) {
           if (typeof actionListener === 'function') {
             actionListener({
               id: epicId,
@@ -387,19 +412,20 @@ var Redux = /*#__PURE__*/function () {
               type: TYPES.EPIC,
               time: Date.now(),
               payload: payload,
-              store: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.clone)(Redux.getInstance().store)
+              store: (0,utils.clone)(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store))
             });
           }
         }); //important to send a clone to prevent any possible data mutations
 
-        func((0,_utils__WEBPACK_IMPORTED_MODULE_0__.clone)(Redux.getInstance().store), payload);
+
+        func((0,utils.clone)(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)), payload);
       }; //snapshot epic
 
 
-      Redux.getInstance().epics[reduxId] = Redux.getInstance().epics[reduxId] || {};
+      _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _epics)[reduxId] = _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _epics)[reduxId] || {};
 
-      if (Redux.getInstance().epics[reduxId][epicId] == null) {
-        Redux.getInstance().epics[reduxId][epicId] = epic;
+      if (_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _epics)[reduxId][epicId] == null) {
+        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _epics)[reduxId][epicId] = epic;
       } else {
         throw new Error("An Epic with the name ".concat(epicId, " already exists for redux ").concat(reduxId));
       }
@@ -421,53 +447,104 @@ var Redux = /*#__PURE__*/function () {
         return [actionName, Redux.createEpic(reduxId, func, actionName)];
       }));
     }
+  }, {
+    key: "callAction",
+    value: function callAction(reduxId, actionId, payload) {
+      var _ref8 = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {},
+          _ref8$isDelayed = _ref8.isDelayed,
+          isDelayed = _ref8$isDelayed === void 0 ? false : _ref8$isDelayed;
+
+      var allActions = _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actions);
+
+      var reduxActions = allActions && allActions[reduxId];
+      var action = reduxActions && reduxActions[actionId];
+
+      if (typeof action !== 'function' && action.type !== TYPES.ACTION) {
+        console.warn("The action ".concat(actionId, " is not a function for store ").concat(reduxId));
+        return;
+      }
+
+      if (isDelayed) {
+        var delayedAction = function delayedAction(customStore) {
+          return action(payload, customStore);
+        };
+
+        delayedAction.type = TYPES.DELAYED_ACTION;
+        return delayedAction;
+      } else {
+        action(payload);
+      }
+    }
+  }, {
+    key: "delayAction",
+    value: function delayAction(reduxId, actionId, payload) {
+      return Redux.callAction(reduxId, actionId, payload, {
+        isDelayed: true
+      });
+    }
+  }, {
+    key: "callActions",
+    value: function callActions(actions) {
+      var newStore = [].concat(actions).reduce(function (acc, delayedAction) {
+        if (typeof delayedAction !== 'function' || delayedAction.type !== TYPES.DELAYED_ACTION) {
+          throw new Error('Invalid Action recieved in CallActions. Expecting a Delayed Action');
+        }
+
+        return Object.assign(acc, delayedAction(acc) || {});
+      }, _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)); //update current store and notify everyone
+
+      _classStaticPrivateMethodGet(Redux, Redux, _updateState).call(Redux, newStore);
+    }
+  }, {
+    key: "callEpic",
+    value: function callEpic(reduxId, epicId, payload) {
+      var allEpics = _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _epics);
+
+      var reduxEpics = allEpics && allEpics[reduxId];
+      var epic = reduxEpics && reduxEpics[epicId];
+
+      if (typeof epic === 'function' && epic.type === TYPES.EPIC) {
+        epic(payload);
+      } else {
+        console.warn("The epic ".concat(epicId, " is not a function for store ").concat(reduxId));
+      }
+    }
   }]);
 
   return Redux;
 }();
 
+function _getInstance() {
+  if (_classStaticPrivateFieldSpecGet(Redux, Redux, _instance) == null) {
+    _classStaticPrivateFieldSpecSet(Redux, Redux, _instance, new Redux());
+  }
 
-Redux.init(); //for global browser import
+  return _classStaticPrivateFieldSpecGet(Redux, Redux, _instance);
+}
+
+function _updateState() {
+  var newStore = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  Object.assign(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store), newStore);
+
+  _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _listeners).forEach(function (listener) {
+    if (typeof listener === 'function') {
+      listener(newStore);
+    }
+  });
+}
+
+var _instance = {
+  writable: true,
+  value: void 0
+};
+
+Redux.init();
+;// CONCATENATED MODULE: ./redux-web.js
+ //for global browser import
 
 if (typeof window !== 'undefined') {
-  window.Redux = {
-    TYPES: TYPES,
-    init: Redux.init,
-    initChangeListener: Redux.initChangeListener,
-    addChangeListener: Redux.addChangeListener,
-    removeChangeListener: Redux.removeChangeListener,
-    addActionListener: Redux.addActionListener,
-    removeActionListener: Redux.removeActionListener,
-    createActions: Redux.createActions,
-    createEpics: Redux.createEpics,
-    getStore: function getStore(reduxId) {
-      return (0,_utils__WEBPACK_IMPORTED_MODULE_0__.clone)(reduxId ? Redux.getInstance().store[reduxId] : Redux.getInstance().store);
-    },
-    getActions: Redux.getActions,
-    getEpics: Redux.getEpics,
-    callAction: function callAction(reduxId, actionId, payload) {
-      var allActions = Redux.getActions();
-      var reduxActions = allActions && allActions[reduxId];
-      var action = reduxActions && reduxActions[actionId];
-
-      if (typeof action === 'function') {
-        action(payload);
-      } else {
-        console.warn("The action ".concat(actionId, " is not a function"));
-      }
-    },
-    callEpic: function callEpic(reduxId, epicId, payload) {
-      var allEpics = Redux.getEpics();
-      var reduxEpics = allEpics && allEpics[reduxId];
-      var epic = reduxEpics && reduxEpics[epicId];
-
-      if (typeof epic === 'function') {
-        epic(payload);
-      } else {
-        console.warn("The epic ".concat(epicId, " is not a function"));
-      }
-    }
-  };
+  window.Redux = Redux;
+  window.Redux.TYPES = TYPES;
 }
 })();
 

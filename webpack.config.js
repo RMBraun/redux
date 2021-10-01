@@ -4,13 +4,16 @@ const glob = require('glob')
 const baseConfig = {
   mode: 'production',
   name: 'redux',
-  entry: [...glob.sync(path.join(__dirname, '*.js')), ...glob.sync(path.join(__dirname, '*.jsx'))]
-    .filter(source => !source.includes('webpack.config'))
-    .reduce((entries, source) => {
-      entries[path.basename(source).replace('.jsx', '').replace('.js', '')] = source
+  entry: [
+    path.join(__dirname, 'redux-web.js'),
+    path.join(__dirname, 'listener.jsx'),
+    path.join(__dirname, 'redux.devtool.loader.js'),
+    path.join(__dirname, 'redux.devtool.jsx'),
+  ].reduce((entries, source) => {
+    entries[path.basename(source).replace('.jsx', '').replace('.js', '').replace('redux-web', 'redux')] = source
 
-      return entries
-    }, {}),
+    return entries
+  }, {}),
   externals: {
     // Use external version of React
     react: 'React',

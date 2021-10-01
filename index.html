@@ -5,47 +5,50 @@
     <script src="dist/redux.js"></script>
     <script src="dist/redux.devtool.loader.js" data-devtool-script="dist/redux.devtool.js"></script>
     <script type="text/javascript">
-      Redux.init({ test: { count: 0 } })
-      Redux.createActions('storeOne', {
+      const storeOneId = 'storeOne'
+      Redux.init({ [storeOneId]: { count: 0 } })
+      Redux.createActions(storeOneId, {
         one: store => {
-          store.test.count = (store.test.count || 0) + 1
+          store[storeOneId].count = (store[storeOneId].count || 0) + 1
           return store
         },
         two: store => {
-          store.test.count = (store.test.count || 0) + 2
+          store[storeOneId].count = (store[storeOneId].count || 0) + 2
           return store
         },
       })
 
-      Redux.init({ testTwo: { backCount: 99 } })
-      Redux.createActions('storeTwoWithReallyLongName', {
+      const storeTwoId = 'storeTwoWithReallyLongName'
+      Redux.init({ [storeTwoId]: { backCount: 99 } })
+      Redux.createActions(storeTwoId, {
         one: store => {
-          store.testTwo.backCount = (store.testTwo.backCount || 99) - 1
+          store[storeTwoId].backCount = (store[storeTwoId].backCount || 99) - 1
           return store
         },
         two: store => {
-          store.testTwo.backCount = (store.testTwo.backCount || 99) - 2
+          store[storeTwoId].backCount = (store[storeTwoId].backCount || 99) - 2
           return store
         },
       })
 
-      Redux.callAction('storeTwoWithReallyLongName', 'one')
-      Redux.callAction('storeOne', 'one')
-      Redux.callAction('storeTwoWithReallyLongName', 'two')
-      Redux.callAction('storeOne', 'two')
-      Redux.callAction('storeTwoWithReallyLongName', 'one')
-      Redux.callAction('storeOne', 'one')
+      Redux.callAction(storeTwoId, 'one')
+      Redux.callAction(storeOneId, 'one')
+      Redux.callAction(storeTwoId, 'two')
+      Redux.callAction(storeOneId, 'two')
+      Redux.callAction(storeTwoId, 'one')
+      Redux.callAction(storeOneId, 'one')
 
-      Redux.createActions('storeThree', {
+      const storeThreeId = 'storeThree'
+      Redux.createActions(storeThreeId, {
         multiStoreUpdates: store => {
-          store.testTwo.backCount = (store.testTwo.backCount || 99) - 1
-          store.test.count = (store.test.count || 0) + 1
+          store[storeTwoId].backCount = (store[storeTwoId].backCount || 99) - 1
+          store[storeOneId].count = (store[storeOneId].count || 0) + 1
           return store
         },
       })
 
       function buttonClick() {
-        Redux.callAction('storeThree', 'multiStoreUpdates')
+        Redux.callAction(storeThreeId, 'multiStoreUpdates')
       }
     </script>
   </head>

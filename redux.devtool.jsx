@@ -139,6 +139,8 @@ const TableRow = styled.tr`
   ${props => (props.isShown ? null : 'display: none;')}
   ${props => (props.isSelected ? 'background-color: rgba(255, 255, 255, 0.2);' : null)}
 
+  ${props => (props.noUpdateEmitted ? 'opacity: 0.2;' : null)}
+
   :hover {
     background-color: rgba(255, 255, 255, 0.2);
   }
@@ -396,6 +398,7 @@ const ReduxDevTool = () => {
               {actionLogs.map((rowData, index) => (
                 <TableRow
                   key={index}
+                  noUpdateEmitted={rowData.isDelayed && !rowData.isLast}
                   onClick={() => {
                     if (rowData.typeDisplay === Redux.TYPES.ACTION) {
                       setActionDiffHtml(htmlDeltaFormatter(rowData.delta))

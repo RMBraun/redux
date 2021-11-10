@@ -186,7 +186,7 @@ export default class Redux {
 
     const actionId = func.name || actionName
 
-    const action = function (payload, customStore) {
+    const action = function (payload, customStore, isLast) {
       //get new store
       //important to send a clone to prevent any possible data mutations
       const newStore = func(clone(customStore || Redux.#getInstance().#store), payload)
@@ -202,6 +202,8 @@ export default class Redux {
             payload,
             prevStore: clone(Redux.#getInstance().#store),
             store: clone(newStore),
+            isDelayed: !!customStore,
+            isLast,
           })
         }
       })
@@ -307,8 +309,8 @@ export default class Redux {
     }
 
     if (isDelayed) {
-      const delayedAction = function (customStore) {
-        return action(payload, customStore)
+      const delayedAction = function (customStore, isLast = false) {
+        return action(payload, customStore, isLast)
       }
       delayedAction.type = TYPES.DELAYED_ACTION
 
@@ -318,17 +320,17 @@ export default class Redux {
     }
   }
 
-  static delayAction(reduxId, actionId, payload) {
+  static chainAction(reduxId, actionId, payload) {
     return Redux.callAction(reduxId, actionId, payload, { isDelayed: true })
   }
 
   static callActions(actions) {
-    const newStore = [].concat(actions).reduce((acc, delayedAction) => {
+    const newStore = [].concat(actions).reduce((acc, delayedAction, i) => {
       if (typeof delayedAction !== 'function' || delayedAction.type !== TYPES.DELAYED_ACTION) {
         throw new Error('Invalid Action recieved in CallActions. Expecting a Delayed Action')
       }
 
-      return Object.assign(acc, delayedAction(acc) || {})
+      return Object.assign(acc, delayedAction(acc, i === actions.length - 1) || {})
     }, Redux.#getInstance().#store)
 
     //update current store and notify everyone

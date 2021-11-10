@@ -6,6 +6,7 @@ const jsondiffpatch = require('jsondiffpatch').create({})
 
 //snapshot script data
 const dataset = document.currentScript.dataset
+const modalTitle = `React Dev Tool - ${window.location.href}`
 
 //initialize and get redux dev tool config values
 const localStorageConfigId = 'ReduxDevToolConfigs'
@@ -41,7 +42,7 @@ const ReduxDevTool = (function () {
 
   return {
     actionLog,
-    actionListener: ({ id, storeId, type, time, prevStore, store, payload }) => {
+    actionListener: ({ id, storeId, type, time, prevStore, store, payload, isDelayed, isLast }) => {
       //limit array size
       if (actionLog.length >= DevToolConfigs.maximumLines || actionLogSize >= DevToolConfigs.maximumMemory) {
         let removedItem = actionLog.shift()
@@ -53,6 +54,8 @@ const ReduxDevTool = (function () {
         storeId,
         actionId: id,
         type,
+        isDelayed,
+        isLast,
         index: actionLogIndex++,
         typeDisplay: type,
         time: ((time - currTime) / 1000).toFixed(3),
@@ -73,7 +76,7 @@ const ReduxDevTool = (function () {
     startReduxDevTool: () => {
       const devToolWindow = window.open(
         '',
-        'ReduxDevTool',
+        modalTitle,
         'height=800,width=1200,status=no,toolbar=no,menubar=no,location=no,scrollbars=yes'
       )
 
@@ -102,7 +105,7 @@ const ReduxDevTool = (function () {
       devToolWindow.document.write(`
               <html>
                   <head>
-                      <title>Redux Dev Tool</title>
+                      <title>${modalTitle}</title>
                       <style>
                         html {
                           font-family: monospace;

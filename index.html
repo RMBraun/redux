@@ -16,6 +16,10 @@
           store[storeOneId].count = (store[storeOneId].count || 0) + 2
           return store
         },
+        add: (store, payload) => {
+          store[storeOneId].count = (store[storeOneId].count || 0) + payload
+          return store
+        },
       })
 
       const storeTwoId = 'storeTwoWithReallyLongName'
@@ -27,6 +31,10 @@
         },
         two: store => {
           store[storeTwoId].backCount = (store[storeTwoId].backCount || 99) - 2
+          return store
+        },
+        sub: (store, payload) => {
+          store[storeOneId].count = (store[storeOneId].count || 0) - payload
           return store
         },
       })
@@ -50,9 +58,19 @@
       function buttonClick() {
         Redux.callAction(storeThreeId, 'multiStoreUpdates')
       }
+
+      function buttonMultiClick() {
+        Redux.callActions([
+          Redux.chainAction(storeTwoId, 'sub', 5),
+          Redux.chainAction(storeOneId, 'add', 6),
+          Redux.chainAction(storeThreeId, 'multiStoreUpdates'),
+          Redux.chainAction(storeTwoId, 'sub', 7),
+        ])
+      }
     </script>
   </head>
   <body>
     <button onclick="buttonClick()">click me</button>
+    <button onclick="buttonMultiClick()">click me</button>
   </body>
 </html>

@@ -326,7 +326,7 @@ var Redux = /*#__PURE__*/function () {
 
       var actionId = func.name || actionName;
 
-      var action = function action(payload, customStore) {
+      var action = function action(payload, customStore, isLast) {
         //get new store
         //important to send a clone to prevent any possible data mutations
         var newStore = func((0,utils.clone)(customStore || _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)), payload); //send new action log to listeners
@@ -340,7 +340,9 @@ var Redux = /*#__PURE__*/function () {
               time: Date.now(),
               payload: payload,
               prevStore: (0,utils.clone)(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)),
-              store: (0,utils.clone)(newStore)
+              store: (0,utils.clone)(newStore),
+              isDelayed: !!customStore,
+              isLast: isLast
             });
           }
         });
@@ -466,7 +468,8 @@ var Redux = /*#__PURE__*/function () {
 
       if (isDelayed) {
         var delayedAction = function delayedAction(customStore) {
-          return action(payload, customStore);
+          var isLast = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+          return action(payload, customStore, isLast);
         };
 
         delayedAction.type = TYPES.DELAYED_ACTION;
@@ -476,8 +479,8 @@ var Redux = /*#__PURE__*/function () {
       }
     }
   }, {
-    key: "delayAction",
-    value: function delayAction(reduxId, actionId, payload) {
+    key: "chainAction",
+    value: function chainAction(reduxId, actionId, payload) {
       return Redux.callAction(reduxId, actionId, payload, {
         isDelayed: true
       });
@@ -485,12 +488,12 @@ var Redux = /*#__PURE__*/function () {
   }, {
     key: "callActions",
     value: function callActions(actions) {
-      var newStore = [].concat(actions).reduce(function (acc, delayedAction) {
+      var newStore = [].concat(actions).reduce(function (acc, delayedAction, i) {
         if (typeof delayedAction !== 'function' || delayedAction.type !== TYPES.DELAYED_ACTION) {
           throw new Error('Invalid Action recieved in CallActions. Expecting a Delayed Action');
         }
 
-        return Object.assign(acc, delayedAction(acc) || {});
+        return Object.assign(acc, delayedAction(acc, i === actions.length - 1) || {});
       }, _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)); //update current store and notify everyone
 
       _classStaticPrivateMethodGet(Redux, Redux, _updateState).call(Redux, newStore);

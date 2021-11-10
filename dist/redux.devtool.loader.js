@@ -5263,7 +5263,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 var jsondiffpatch = __webpack_require__(311).create({}); //snapshot script data
 
 
-var dataset = document.currentScript.dataset; //initialize and get redux dev tool config values
+var dataset = document.currentScript.dataset;
+var modalTitle = "React Dev Tool - ".concat(window.location.href); //initialize and get redux dev tool config values
 
 var localStorageConfigId = 'ReduxDevToolConfigs';
 var DevToolConfigs = JSON.parse(localStorage.getItem(localStorageConfigId)) || {};
@@ -5306,7 +5307,9 @@ var ReduxDevTool = function () {
           time = _ref.time,
           prevStore = _ref.prevStore,
           store = _ref.store,
-          payload = _ref.payload;
+          payload = _ref.payload,
+          isDelayed = _ref.isDelayed,
+          isLast = _ref.isLast;
 
       //limit array size
       if (actionLog.length >= DevToolConfigs.maximumLines || actionLogSize >= DevToolConfigs.maximumMemory) {
@@ -5319,6 +5322,8 @@ var ReduxDevTool = function () {
         storeId: storeId,
         actionId: id,
         type: type,
+        isDelayed: isDelayed,
+        isLast: isLast,
         index: actionLogIndex++,
         typeDisplay: type,
         time: ((time - currTime) / 1000).toFixed(3),
@@ -5334,7 +5339,7 @@ var ReduxDevTool = function () {
       });
     },
     startReduxDevTool: function startReduxDevTool() {
-      var devToolWindow = window.open('', 'ReduxDevTool', 'height=800,width=1200,status=no,toolbar=no,menubar=no,location=no,scrollbars=yes'); //global injection points
+      var devToolWindow = window.open('', modalTitle, 'height=800,width=1200,status=no,toolbar=no,menubar=no,location=no,scrollbars=yes'); //global injection points
 
       devToolWindow.React = window.React;
       devToolWindow.ReactDOM = window.ReactDOM;
@@ -5362,7 +5367,7 @@ var ReduxDevTool = function () {
 
       devToolWindow.document.querySelector('body').innerHTML = ''; //create popup DOM structure
 
-      devToolWindow.document.write("\n              <html>\n                  <head>\n                      <title>Redux Dev Tool</title>\n                      <style>\n                        html {\n                          font-family: monospace;\n                          background: #212121;\n                        }\n\n                        body {\n                          margin: 0px;\n                        }\n\n                        #ReduxDevTool {\n                          position: relative;\n                          display: flex;\n                          flex-direction: column;\n                          height: 100vh;\n                          width: 100vw;\n                        }\n                      </style>\n                  </head>\n                  <body>\n                      <div id=\"ReduxDevTool\"></div>\n                      <script src=\"".concat(dataset.devtoolScript, "\"></script>\n                  </body>\n              </html>\n          ")); //add stop function to main page window
+      devToolWindow.document.write("\n              <html>\n                  <head>\n                      <title>".concat(modalTitle, "</title>\n                      <style>\n                        html {\n                          font-family: monospace;\n                          background: #212121;\n                        }\n\n                        body {\n                          margin: 0px;\n                        }\n\n                        #ReduxDevTool {\n                          position: relative;\n                          display: flex;\n                          flex-direction: column;\n                          height: 100vh;\n                          width: 100vw;\n                        }\n                      </style>\n                  </head>\n                  <body>\n                      <div id=\"ReduxDevTool\"></div>\n                      <script src=\"").concat(dataset.devtoolScript, "\"></script>\n                  </body>\n              </html>\n          ")); //add stop function to main page window
 
       window.stopReduxDevTool = function () {
         setConfig('enablePopup', false);

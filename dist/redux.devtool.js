@@ -3463,6 +3463,8 @@ var TableRow = emotion_styled_base_browser_esm("tr", {
   return props.isShown ? null : 'display: none;';
 }, " ", function (props) {
   return props.isSelected ? 'background-color: rgba(255, 255, 255, 0.2);' : null;
+}, " ", function (props) {
+  return props.noUpdateEmitted ? 'opacity: 0.2;' : null;
 }, " :hover{background-color:rgba(255, 255, 255, 0.2);}" + ( true ? "" : 0));
 
 var TableData = emotion_styled_base_browser_esm("td", {
@@ -3721,6 +3723,7 @@ var ReduxDevTool = function ReduxDevTool() {
     }, key, name);
   }))), /*#__PURE__*/_jsx("tbody", {}, void 0, actionLogs.map(function (rowData, index) {
     return /*#__PURE__*/_jsx(TableRow, {
+      noUpdateEmitted: rowData.isDelayed && !rowData.isLast,
       onClick: function onClick() {
         if (rowData.typeDisplay === (external_Redux_default()).TYPES.ACTION) {
           setActionDiffHtml(format(rowData.delta));

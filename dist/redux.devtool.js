@@ -3384,32 +3384,32 @@ var Toolbar = /*#__PURE__*/emotion_styled_base_browser_esm(Panel, {
   target: "ezyz9nq18",
   label: "Toolbar"
 })( true ? {
-  name: "3bs21s",
-  styles: "height:25px;padding:5px;overflow:auto;display:flex;flex-direction:row;align-items:center;font-size:16px;margin-bottom:0px;flex:1 0 auto"
+  name: "fvm02b",
+  styles: "display:flex;flex-wrap:wrap;justify-content:space-between;padding:5px;flex-direction:row;align-items:center;font-size:16px;margin-bottom:0px;flex:1 0 auto;overflow:auto"
 } : 0);
 
 var ColumnToggles = emotion_styled_base_browser_esm("div", {
   target: "ezyz9nq17",
   label: "ColumnToggles"
 })( true ? {
-  name: "ho1qnd",
-  styles: "display:flex;flex-direction:row"
+  name: "17hu9ra",
+  styles: "display:flex;flex-direction:row;margin:5px"
 } : 0);
 
 var ClearLogsButton = /*#__PURE__*/emotion_styled_base_browser_esm(ActionButton, {
   target: "ezyz9nq16",
   label: "ClearLogsButton"
 })( true ? {
-  name: "1mg7ez3",
-  styles: "margin-left:auto;font-size:16px"
+  name: "zpyba7",
+  styles: "font-size:16px;margin:5px"
 } : 0);
 
 var Filters = emotion_styled_base_browser_esm("div", {
   target: "ezyz9nq15",
   label: "Filters"
 })( true ? {
-  name: "hs8qex",
-  styles: "display:flex;flex-direction:row;margin-left:auto"
+  name: "17hu9ra",
+  styles: "display:flex;flex-direction:row;margin:5px"
 } : 0);
 
 var CheckBox = emotion_styled_base_browser_esm("input", {
@@ -3572,7 +3572,7 @@ var createColumn = function createColumn(name, key) {
 };
 
 var getColumns = function getColumns() {
-  return [createColumn('#', 'index'), createColumn('Type', 'typeDisplay'), createColumn('Store', 'storeId'), createColumn('Action', 'actionId'), createColumn('Time (s)', 'time')];
+  return [createColumn('#', 'index'), createColumn('Type', 'typeDisplay'), createColumn('Store', 'storeId'), createColumn('Action', 'actionId'), createColumn('Time(s)', 'time')];
 };
 
 var getTypeFilters = function getTypeFilters() {

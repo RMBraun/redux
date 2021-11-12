@@ -60,31 +60,33 @@ const Panel = styled.div`
 `
 
 const Toolbar = styled(Panel)`
-  height: 25px;
-  padding: 5px;
-  overflow: auto;
   display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 5px;
   flex-direction: row;
   align-items: center;
   font-size: 16px;
   margin-bottom: 0px;
   flex: 1 0 auto;
+  overflow: auto;
 `
 
 const ColumnToggles = styled.div`
   display: flex;
   flex-direction: row;
+  margin: 5px;
 `
 
 const ClearLogsButton = styled(ActionButton)`
-  margin-left: auto;
   font-size: 16px;
+  margin: 5px;
 `
 
 const Filters = styled.div`
   display: flex;
   flex-direction: row;
-  margin-left: auto;
+  margin: 5px;
 `
 
 const CheckBox = styled.input``
@@ -263,7 +265,7 @@ const getColumns = () => [
   createColumn('Type', 'typeDisplay'),
   createColumn('Store', 'storeId'),
   createColumn('Action', 'actionId'),
-  createColumn('Time (s)', 'time'),
+  createColumn('Time(s)', 'time'),
 ]
 
 const getTypeFilters = () =>

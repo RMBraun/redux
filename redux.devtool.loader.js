@@ -149,7 +149,7 @@ const ReduxDevTool = (function () {
 Redux.addActionListener(ReduxDevTool.actionListener)
 window.addEventListener('beforeunload', function () {
   Redux.removeActionListener(ReduxDevTool.actionListener)
-  window.closeReduxDevTool()
+  window && window.closeReduxDevTool && window.closeReduxDevTool()
 })
 
 console.log('Redux dev tool loaded')

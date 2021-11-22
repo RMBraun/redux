@@ -30,7 +30,8 @@ export default class Redux {
   }
 
   static getStore(reduxId) {
-    return clone(reduxId ? Redux.#getInstance().#store[reduxId] : Redux.#getInstance().#store)
+    const store = reduxId ? Redux.#getInstance().#store[reduxId] : Redux.#getInstance().#store
+    return store ? clone(store) : store
   }
 
   static getActions(reduxId) {
@@ -234,16 +235,15 @@ export default class Redux {
     return action
   }
 
-  static createActions(reduxId, actions) {
-    if (reduxId == null) {
-      throw new Error(`You must specify a non-null reduxId when creating redux actions`)
+  static createActions(reduxId, actions = {}) {
+    if (reduxId == null || reduxId.constructor.name !== 'String') {
+      throw new Error(`You must specify a non-null String reduxId when creating redux actions`)
+    } else if (actions.constructor.name !== 'Object') {
+      throw new Error('actions must be an Object')
     }
 
     return Object.fromEntries(
-      Object.entries(actions || {}).map(([actionName, func]) => [
-        actionName,
-        Redux.createAction(reduxId, func, actionName),
-      ])
+      Object.entries(actions).map(([actionName, func]) => [actionName, Redux.createAction(reduxId, func, actionName)])
     )
   }
 
@@ -272,6 +272,11 @@ export default class Redux {
       //important to send a clone to prevent any possible data mutations
       func(clone(Redux.#getInstance().#store), payload)
     }
+
+    //add prototype toString so that it resolves to the actionId
+    epic.type = TYPES.EPIC
+    epic.toString = () => epicId
+    epic.prototype.toString = () => epicId
 
     //snapshot epic
     Redux.#getInstance().#epics[reduxId] = Redux.#getInstance().#epics[reduxId] || {}

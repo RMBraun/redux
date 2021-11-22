@@ -155,7 +155,8 @@ var Redux = /*#__PURE__*/function () {
   _createClass(Redux, null, [{
     key: "getStore",
     value: function getStore(reduxId) {
-      return (0,utils.clone)(reduxId ? _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)[reduxId] : _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store));
+      var store = reduxId ? _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)[reduxId] : _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store);
+      return store ? (0,utils.clone)(store) : store;
     }
   }, {
     key: "getActions",
@@ -380,12 +381,16 @@ var Redux = /*#__PURE__*/function () {
     }
   }, {
     key: "createActions",
-    value: function createActions(reduxId, actions) {
-      if (reduxId == null) {
-        throw new Error("You must specify a non-null reduxId when creating redux actions");
+    value: function createActions(reduxId) {
+      var actions = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+      if (reduxId == null || reduxId.constructor.name !== 'String') {
+        throw new Error("You must specify a non-null String reduxId when creating redux actions");
+      } else if (actions.constructor.name !== 'Object') {
+        throw new Error('actions must be an Object');
       }
 
-      return Object.fromEntries(Object.entries(actions || {}).map(function (_ref4) {
+      return Object.fromEntries(Object.entries(actions).map(function (_ref4) {
         var _ref5 = _slicedToArray(_ref4, 2),
             actionName = _ref5[0],
             func = _ref5[1];
@@ -421,6 +426,17 @@ var Redux = /*#__PURE__*/function () {
 
 
         func((0,utils.clone)(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)), payload);
+      }; //add prototype toString so that it resolves to the actionId
+
+
+      epic.type = TYPES.EPIC;
+
+      epic.toString = function () {
+        return epicId;
+      };
+
+      epic.prototype.toString = function () {
+        return epicId;
       }; //snapshot epic
 
 

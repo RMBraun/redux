@@ -254,7 +254,7 @@ export default class Redux {
 
     const epicId = func.name || actionName
 
-    const epic = payload => {
+    const epic = function (payload) {
       //send new action log to listeners
       Redux.#getInstance().#actionListeners.forEach(actionListener => {
         if (typeof actionListener === 'function') {

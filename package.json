@@ -1,6 +1,6 @@
 {
   "name": "@rybr/redux",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Simple implementation of redux for use with React and JS",
   "main": "redux.js",
   "scripts": {

@@ -95,7 +95,7 @@ function listen(pickerFunc, Component) {
       getInitialState = _Redux$initChangeList.getInitialState,
       propSelectFunction = _Redux$initChangeList.propSelectFunction;
 
-  return function ReduxWrapper(props) {
+  return /*#__PURE__*/React.forwardRef(function ReduxWrapper(props, forwardedRef) {
     var _React$useState = React.useState(getInitialState()),
         _React$useState2 = _slicedToArray(_React$useState, 2),
         state = _React$useState2[0],
@@ -116,8 +116,10 @@ function listen(pickerFunc, Component) {
         Redux.removeChangeListener(propListener);
       };
     }, []);
-    return /*#__PURE__*/React.createElement(Component, _extends({}, state, props));
-  };
+    return /*#__PURE__*/React.createElement(Component, _extends({
+      ref: forwardedRef
+    }, state, props));
+  });
 }
 /******/ })()
 ;

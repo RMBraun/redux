@@ -4,7 +4,7 @@ import Redux from 'redux'
 export default function listen(pickerFunc, Component) {
   const { getInitialState, propSelectFunction } = Redux.initChangeListener(pickerFunc)
 
-  return function ReduxWrapper(props) {
+  return React.forwardRef(function ReduxWrapper(props, forwardedRef) {
     const [state, setState] = React.useState(getInitialState())
 
     React.useEffect(() => {
@@ -22,6 +22,6 @@ export default function listen(pickerFunc, Component) {
       }
     }, [])
 
-    return <Component {...state} {...props} />
-  }
+    return <Component ref={forwardedRef} {...state} {...props} />
+  })
 }

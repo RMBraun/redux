@@ -1,54 +1,9 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 456:
-/***/ ((module) => {
+/***/ 144:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-function clone(input) {
-  return JSON.parse(JSON.stringify(input));
-}
-
-module.exports = {
-  clone: clone
-};
-
-/***/ })
-
-/******/ 	});
-/************************************************************************/
-/******/ 	// The module cache
-/******/ 	var __webpack_module_cache__ = {};
-/******/ 	
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/ 		// Check if module is in cache
-/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
-/******/ 		if (cachedModule !== undefined) {
-/******/ 			return cachedModule.exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = __webpack_module_cache__[moduleId] = {
-/******/ 			// no module.id needed
-/******/ 			// no module.loaded needed
-/******/ 			exports: {}
-/******/ 		};
-/******/ 	
-/******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
-/******/ 	
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/ 	
-/************************************************************************/
-var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be in strict mode.
-(() => {
-"use strict";
-
-// EXTERNAL MODULE: ./utils.js
-var utils = __webpack_require__(456);
-;// CONCATENATED MODULE: ./redux.js
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -95,6 +50,8 @@ function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!priva
 
 function _classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } }
 
+var _require = __webpack_require__(456),
+    clone = _require.clone;
 
 var TYPES = {
   EPIC: 'Epic',
@@ -156,7 +113,7 @@ var Redux = /*#__PURE__*/function () {
     key: "getStore",
     value: function getStore(reduxId) {
       var store = reduxId ? _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)[reduxId] : _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store);
-      return store ? (0,utils.clone)(store) : store;
+      return store ? clone(store) : store;
     }
   }, {
     key: "getActions",
@@ -190,7 +147,7 @@ var Redux = /*#__PURE__*/function () {
       };
 
       var getInitialState = function getInitialState() {
-        return propSelectFunction((0,utils.clone)(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)));
+        return propSelectFunction(clone(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)));
       };
 
       return {
@@ -330,7 +287,7 @@ var Redux = /*#__PURE__*/function () {
       var action = function action(payload, customStore, isLast) {
         //get new store
         //important to send a clone to prevent any possible data mutations
-        var newStore = func((0,utils.clone)(customStore || _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)), payload); //send new action log to listeners
+        var newStore = func(clone(customStore || _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)), payload); //send new action log to listeners
 
         _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).forEach(function (actionListener) {
           if (typeof actionListener === 'function') {
@@ -340,8 +297,8 @@ var Redux = /*#__PURE__*/function () {
               type: TYPES.ACTION,
               time: Date.now(),
               payload: payload,
-              prevStore: (0,utils.clone)(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)),
-              store: (0,utils.clone)(newStore),
+              prevStore: clone(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)),
+              store: clone(newStore),
               isDelayed: !!customStore,
               isLast: isLast
             });
@@ -419,13 +376,13 @@ var Redux = /*#__PURE__*/function () {
               type: TYPES.EPIC,
               time: Date.now(),
               payload: payload,
-              store: (0,utils.clone)(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store))
+              store: clone(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store))
             });
           }
         }); //important to send a clone to prevent any possible data mutations
 
 
-        func((0,utils.clone)(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)), payload);
+        func(clone(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)), payload);
       }; //add prototype toString so that it resolves to the actionId
 
 
@@ -556,14 +513,98 @@ var _instance = {
   writable: true,
   value: void 0
 };
-
+Redux.TYPES = TYPES;
 Redux.init();
-;// CONCATENATED MODULE: ./redux-web.js
+
+if (typeof window !== 'undefined') {
+  window.Redux = window.Redux || Redux;
+}
+
+module.exports = Redux;
+
+/***/ }),
+
+/***/ 456:
+/***/ ((module) => {
+
+function clone(input) {
+  return JSON.parse(JSON.stringify(input));
+}
+
+module.exports = {
+  clone: clone
+};
+
+/***/ })
+
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__webpack_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__webpack_require__.d(getter, { a: getter });
+/******/ 			return getter;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/************************************************************************/
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+(() => {
+"use strict";
+/* harmony import */ var _redux__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(144);
+/* harmony import */ var _redux__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_redux__WEBPACK_IMPORTED_MODULE_0__);
  //for global browser import
 
 if (typeof window !== 'undefined') {
-  window.Redux = Redux;
-  window.Redux.TYPES = TYPES;
+  window.Redux = (_redux__WEBPACK_IMPORTED_MODULE_0___default());
+  window.Redux.TYPES = _redux__WEBPACK_IMPORTED_MODULE_0__.TYPES;
 }
 })();
 

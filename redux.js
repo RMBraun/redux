@@ -1,11 +1,11 @@
-import { clone } from './utils'
+const { clone } = require('./utils')
 
-export const TYPES = {
+const TYPES = {
   EPIC: 'Epic',
   ACTION: 'Action',
   DELAYED_ACTION: 'DelayedAction',
 }
-export default class Redux {
+class Redux {
   #listeners
   #store
   #actionListeners
@@ -355,4 +355,11 @@ export default class Redux {
   }
 }
 
+Redux.TYPES = TYPES
 Redux.init()
+
+if(typeof window !== 'undefined') {
+  window.Redux = window.Redux || Redux
+}
+
+module.exports = Redux

@@ -1,14 +1,9 @@
 /******/ (() => { // webpackBootstrap
-/******/ 	"use strict";
-var __webpack_exports__ = {};
+/******/ 	var __webpack_modules__ = ({
 
-// UNUSED EXPORTS: default
+/***/ 317:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-;// CONCATENATED MODULE: external "React"
-const external_React_namespaceObject = React;
-;// CONCATENATED MODULE: external "Redux"
-const external_Redux_namespaceObject = Redux;
-;// CONCATENATED MODULE: ./listener.jsx
 function _extends() {
   _extends = Object.assign || function (target) {
     for (var i = 1; i < arguments.length; i++) {
@@ -88,14 +83,16 @@ function _arrayWithHoles(arr) {
   if (Array.isArray(arr)) return arr;
 }
 
+var React = __webpack_require__(804);
 
+function listener(pickerFunc, Component) {
+  var _this$Redux$initChang = this.Redux.initChangeListener(pickerFunc),
+      getInitialState = _this$Redux$initChang.getInitialState,
+      propSelectFunction = _this$Redux$initChang.propSelectFunction;
 
-function listen(pickerFunc, Component) {
-  var _Redux$initChangeList = Redux.initChangeListener(pickerFunc),
-      getInitialState = _Redux$initChangeList.getInitialState,
-      propSelectFunction = _Redux$initChangeList.propSelectFunction;
+  return React.forwardRef(function ReduxWrapper(props, forwardedRef) {
+    var _this = this;
 
-  return /*#__PURE__*/React.forwardRef(function ReduxWrapper(props, forwardedRef) {
     var _React$useState = React.useState(getInitialState()),
         _React$useState2 = _slicedToArray(_React$useState, 2),
         state = _React$useState2[0],
@@ -109,11 +106,11 @@ function listen(pickerFunc, Component) {
           setState(propSelectFunction(newStore));
         };
 
-        Redux.addChangeListener(propListener);
+        _this.Redux.addChangeListener(propListener);
       }
 
       return function () {
-        Redux.removeChangeListener(propListener);
+        _this.Redux.removeChangeListener(propListener);
       };
     }, []);
     return /*#__PURE__*/React.createElement(Component, _extends({
@@ -121,5 +118,59 @@ function listen(pickerFunc, Component) {
     }, state, props));
   });
 }
+
+listener.prototype.init = function (Redux) {
+  this.Redux = Redux;
+};
+
+if (typeof window !== null) {
+  listener.init(window.Redux);
+}
+
+module.exports = listener;
+
+/***/ }),
+
+/***/ 804:
+/***/ ((module) => {
+
+"use strict";
+module.exports = React;
+
+/***/ })
+
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/************************************************************************/
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module is referenced by other modules so it can't be inlined
+/******/ 	var __webpack_exports__ = __webpack_require__(317);
+/******/ 	
 /******/ })()
 ;

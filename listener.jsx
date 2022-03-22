@@ -1,8 +1,7 @@
-import React from 'react'
-import Redux from 'redux'
+const React = require('react')
 
-export default function listen(pickerFunc, Component) {
-  const { getInitialState, propSelectFunction } = Redux.initChangeListener(pickerFunc)
+function listener(pickerFunc, Component) {
+  const { getInitialState, propSelectFunction } = this.Redux.initChangeListener(pickerFunc)
 
   return React.forwardRef(function ReduxWrapper(props, forwardedRef) {
     const [state, setState] = React.useState(getInitialState())
@@ -14,14 +13,24 @@ export default function listen(pickerFunc, Component) {
           setState(propSelectFunction(newStore))
         }
 
-        Redux.addChangeListener(propListener)
+        this.Redux.addChangeListener(propListener)
       }
 
       return () => {
-        Redux.removeChangeListener(propListener)
+        this.Redux.removeChangeListener(propListener)
       }
     }, [])
 
     return <Component ref={forwardedRef} {...state} {...props} />
   })
 }
+
+listener.prototype.init = function(Redux) {
+  this.Redux = Redux
+}
+
+if(typeof window !== null) {
+  listener.init(window.Redux)
+}
+
+module.exports = listener

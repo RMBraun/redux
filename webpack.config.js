@@ -15,9 +15,6 @@ const baseConfig = {
     return entries
   }, {}),
   externals: {
-    // Use external version of React
-    react: 'React',
-    'react-dom': 'ReactDOM',
     redux: 'Redux',
   },
   output: {

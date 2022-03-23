@@ -1,36 +1,49 @@
 const React = require('react')
 
-function listener(pickerFunc, Component) {
-  const { getInitialState, propSelectFunction } = this.Redux.initChangeListener(pickerFunc)
+var Redux
+
+if (typeof window !== 'undefined') {
+  Redux = window.Redux
+}
+
+function bindRedux(newRedux) {
+  Redux = newRedux
+}
+
+function listen(pickerFunc, Component) {
+  if (Redux == null) {
+    throw new Error("No Redux bound to this listener. Please call 'bindRedux'")
+  }
+
+  const { getInitialState, propSelectFunction } = Redux.initChangeListener(pickerFunc)
 
   return React.forwardRef(function ReduxWrapper(props, forwardedRef) {
     const [state, setState] = React.useState(getInitialState())
 
     React.useEffect(() => {
-      let propListener = propListener
+      var propListener = typeof propListener === 'undefined' ? null : propListener
       if (propListener == null) {
         propListener = newStore => {
           setState(propSelectFunction(newStore))
         }
 
-        this.Redux.addChangeListener(propListener)
+        Redux.addChangeListener(propListener)
       }
 
       return () => {
-        this.Redux.removeChangeListener(propListener)
+        Redux.removeChangeListener(propListener)
       }
     }, [])
 
-    return <Component ref={forwardedRef} {...state} {...props} />
+    return React.createElement(Component, {
+      ref: forwardedRef,
+      ...state,
+      ...props,
+    })
   })
 }
 
-listener.prototype.init = function(Redux) {
-  this.Redux = Redux
+module.exports = {
+  bindRedux,
+  listen,
 }
-
-if(typeof window !== null) {
-  listener.init(window.Redux)
-}
-
-module.exports = listener

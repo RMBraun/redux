@@ -5,12 +5,13 @@ const baseConfig = {
   mode: 'production',
   name: 'redux',
   entry: [
-    path.join(__dirname, 'redux-web.js'),
+    path.join(__dirname, 'redux.js'),
     path.join(__dirname, 'listener.jsx'),
+    path.join(__dirname, 'pick.js'),
     path.join(__dirname, 'redux.devtool.loader.js'),
     path.join(__dirname, 'redux.devtool.jsx'),
   ].reduce((entries, source) => {
-    entries[path.basename(source).replace('.jsx', '').replace('.js', '').replace('redux-web', 'redux')] = source
+    entries[path.basename(source).replace('.jsx', '').replace('.js', '')] = source
 
     return entries
   }, {}),

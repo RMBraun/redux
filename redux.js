@@ -5,6 +5,7 @@ const TYPES = {
   ACTION: 'Action',
   DELAYED_ACTION: 'DelayedAction',
 }
+
 class Redux {
   #listeners
   #store
@@ -358,7 +359,8 @@ class Redux {
 Redux.TYPES = TYPES
 Redux.init()
 
-if(typeof window !== 'undefined') {
+//Init globally for when imported in a web browser
+if (typeof window !== 'undefined') {
   window.Redux = window.Redux || Redux
 }
 

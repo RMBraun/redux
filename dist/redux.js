@@ -1,6 +1,18 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 104:
+/***/ ((module) => {
+
+module.exports = {
+  EVENTS: {
+    UPDATE: '@rybr:redux:updateState',
+    ACTION: '@rybr:redux:action'
+  }
+};
+
+/***/ }),
+
 /***/ 144:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -50,16 +62,17 @@ function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!priva
 
 function _classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } }
 
-var _require = __webpack_require__(456),
-    clone = _require.clone;
+var EE = __webpack_require__(729);
 
+var _require = __webpack_require__(104),
+    EVENTS = _require.EVENTS;
+
+var EventEmitter = new EE();
 var TYPES = {
   EPIC: 'Epic',
   ACTION: 'Action',
   DELAYED_ACTION: 'DelayedAction'
 };
-
-var _listeners = /*#__PURE__*/new WeakMap();
 
 var _store = /*#__PURE__*/new WeakMap();
 
@@ -72,11 +85,6 @@ var _epics = /*#__PURE__*/new WeakMap();
 var Redux = /*#__PURE__*/function () {
   function Redux() {
     _classCallCheck(this, Redux);
-
-    _listeners.set(this, {
-      writable: true,
-      value: void 0
-    });
 
     _store.set(this, {
       writable: true,
@@ -98,11 +106,9 @@ var Redux = /*#__PURE__*/function () {
       value: void 0
     });
 
-    _classPrivateFieldSet(this, _listeners, []);
-
     _classPrivateFieldSet(this, _store, {});
 
-    _classPrivateFieldSet(this, _actionListeners, []);
+    _classPrivateFieldSet(this, _actionListeners, new Map());
 
     _classPrivateFieldSet(this, _actions, {});
 
@@ -113,7 +119,7 @@ var Redux = /*#__PURE__*/function () {
     key: "getStore",
     value: function getStore(reduxId) {
       var store = reduxId ? _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)[reduxId] : _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store);
-      return store ? clone(store) : store;
+      return store;
     }
   }, {
     key: "getActions",
@@ -147,7 +153,7 @@ var Redux = /*#__PURE__*/function () {
       };
 
       var getInitialState = function getInitialState() {
-        return propSelectFunction(clone(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)));
+        return propSelectFunction(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store));
       };
 
       return {
@@ -159,7 +165,7 @@ var Redux = /*#__PURE__*/function () {
     key: "addChangeListener",
     value: function addChangeListener(changeListener) {
       if (typeof changeListener === 'function') {
-        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _listeners).push(changeListener);
+        EventEmitter.addListener(EVENTS.UPDATE, changeListener);
       } else {
         throw new Error('Change listener must be of type function');
       }
@@ -167,24 +173,20 @@ var Redux = /*#__PURE__*/function () {
   }, {
     key: "removeChangeListener",
     value: function removeChangeListener(changeListener) {
-      var index = _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _listeners).indexOf(changeListener);
-
-      if (index !== -1) {
-        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _listeners).splice(index, 1);
-      }
+      EventEmitter.removeListener(EVENTS.UPDATE, changeListener);
     }
     /*
     example usages:
     import { Actions } from './myRedux'
+     Redux.addActionListener(function ({ id, storeId, type, time, payload, prevStore, store }) {
+      if(id === Actions.actionOne.toString()) {
+          console.log(id, payload)
+      }
+    })
      //listen for Redux Actions and Epics
     Redux.addActionListener({
       [Actions.actionOne]: ({ id, storeId, type, time, payload, prevStore, store }) => {
         console.log(id, payload)
-      }
-    })
-     Redux.addActionListener(function ({ id, storeId, type, time, payload, prevStore, store }) {
-      if(id === Actions.actionOne.toString()) {
-          console.log(id, payload)
       }
     })
      //can bind to multiple actions for a single callback
@@ -203,7 +205,7 @@ var Redux = /*#__PURE__*/function () {
       var type = changeListener && changeListener.constructor && changeListener.constructor.name;
 
       if (type === Function.name) {
-        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).push(changeListener);
+        EventEmitter.addListener(EVENTS.ACTION, changeListener);
       } else if (type === Object.name) {
         Object.entries(changeListener).forEach(function (_ref) {
           var _ref2 = _slicedToArray(_ref, 2),
@@ -213,15 +215,27 @@ var Redux = /*#__PURE__*/function () {
           if (callback == null) {
             throw new Error("Action listener for ".concat(key, " cannot be null"));
           }
-        });
 
-        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).push(function (info) {
-          var listenerForId = changeListener[info.id];
+          if (typeof callback !== 'function') {
+            throw new Error("Action listener for ".concat(key, " must be a Function"));
+          }
 
-          if (listenerForId && listenerForId.constructor && listenerForId.constructor.name === Function.name) {
-            listenerForId(info);
+          if (typeof key !== 'string') {
+            throw new Error('All action listener keys must be Strings');
           }
         });
+
+        var actionListenerMapFunc = function actionListenerMapFunc(info) {
+          var listenerForId = changeListener[info.id];
+
+          if (listenerForId) {
+            listenerForId(info);
+          }
+        };
+
+        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).set(changeListener, actionListenerMapFunc);
+
+        EventEmitter.addListener(EVENTS.ACTION, actionListenerMapFunc);
       } else if (type === Array.name) {
         changeListener.forEach(function (listener, i) {
           if (listener == null) {
@@ -239,8 +253,7 @@ var Redux = /*#__PURE__*/function () {
           if (listener.callback == null || listener.callback.constructor && listener.callback.constructor.name !== Function.name) {
             throw new Error("Action listener callback at index ".concat(i, " must be a function"));
           }
-        }); //in case they use the Action function directly as the ID rather than the
-        //string ID
+        }); //in case they use the Action function directly as the ID rather than the string ID
 
         var formattedChangeListener = changeListener.map(function (listener) {
           return _objectSpread(_objectSpread({}, listener), {}, {
@@ -250,7 +263,7 @@ var Redux = /*#__PURE__*/function () {
           });
         });
 
-        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).push(function (info) {
+        var _actionListenerMapFunc = function _actionListenerMapFunc(info) {
           formattedChangeListener.forEach(function (_ref3) {
             var ids = _ref3.ids,
                 callback = _ref3.callback;
@@ -259,7 +272,11 @@ var Redux = /*#__PURE__*/function () {
               callback(info);
             }
           });
-        });
+        };
+
+        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).set(changeListener, _actionListenerMapFunc);
+
+        EventEmitter.addListener(EVENTS.ACTION, _actionListenerMapFunc);
       } else {
         throw new Error('Action listener must be of type function, object, or array');
       }
@@ -267,10 +284,10 @@ var Redux = /*#__PURE__*/function () {
   }, {
     key: "removeActionListener",
     value: function removeActionListener(changeListener) {
-      var index = _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).indexOf(changeListener);
+      if (_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).has(changeListener)) {
+        EventEmitter.removeListener(EVENTS.ACTION, _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).get(changeListener));
 
-      if (index !== -1) {
-        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).splice(index, 1);
+        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).delete(changeListener);
       }
     }
   }, {
@@ -284,30 +301,28 @@ var Redux = /*#__PURE__*/function () {
 
       var actionId = func.name || actionName;
 
-      var action = function action(payload, customStore, isLast) {
+      var action = function action(payload) {
+        var isDelayed = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+        var isLast = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
         //get new store
-        //important to send a clone to prevent any possible data mutations
-        var newStore = func(clone(customStore || _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)), payload); //send new action log to listeners
+        var newStore = func(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store), payload); //send new action log to listeners
 
-        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).forEach(function (actionListener) {
-          if (typeof actionListener === 'function') {
-            actionListener({
-              id: actionId,
-              storeId: reduxId,
-              type: TYPES.ACTION,
-              time: Date.now(),
-              payload: payload,
-              prevStore: clone(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)),
-              store: clone(newStore),
-              isDelayed: !!customStore,
-              isLast: isLast
-            });
-          }
+        EventEmitter.emit(EVENTS.ACTION, {
+          id: actionId,
+          storeId: reduxId,
+          type: TYPES.ACTION,
+          time: Date.now(),
+          payload: payload,
+          prevStore: newStore,
+          //TODO remove diff
+          store: newStore,
+          isDelayed: !!isDelayed,
+          isLast: isLast
         });
 
-        if (!customStore) {
-          //update current global store and notify everyone
-          _classStaticPrivateMethodGet(Redux, Redux, _updateState).call(Redux, newStore);
+        if (!isDelayed) {
+          //notify everyone
+          EventEmitter.emit(EVENTS.UPDATE, newStore);
         } else {
           //return the new store
           return newStore;
@@ -367,22 +382,18 @@ var Redux = /*#__PURE__*/function () {
       var epicId = func.name || actionName;
 
       var epic = function epic(payload) {
-        //send new action log to listeners
-        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).forEach(function (actionListener) {
-          if (typeof actionListener === 'function') {
-            actionListener({
-              id: epicId,
-              storeId: reduxId,
-              type: TYPES.EPIC,
-              time: Date.now(),
-              payload: payload,
-              store: clone(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store))
-            });
-          }
-        }); //important to send a clone to prevent any possible data mutations
+        var store = _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store); //send new action log to listeners
 
 
-        func(clone(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)), payload);
+        EventEmitter.emit(EVENTS.ACTION, {
+          id: epicId,
+          storeId: reduxId,
+          type: TYPES.EPIC,
+          time: Date.now(),
+          payload: payload,
+          store: store
+        });
+        func(store, payload);
       }; //add prototype toString so that it resolves to the actionId
 
 
@@ -440,9 +451,9 @@ var Redux = /*#__PURE__*/function () {
       }
 
       if (isDelayed) {
-        var delayedAction = function delayedAction(customStore) {
-          var isLast = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-          return action(payload, customStore, isLast);
+        var delayedAction = function delayedAction() {
+          var isLast = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+          return action(payload, true, isLast);
         };
 
         delayedAction.type = TYPES.DELAYED_ACTION;
@@ -460,16 +471,17 @@ var Redux = /*#__PURE__*/function () {
     }
   }, {
     key: "callActions",
-    value: function callActions(actions) {
-      var newStore = [].concat(actions).reduce(function (acc, delayedAction, i) {
+    value: function callActions(rawActions) {
+      var actions = [].concat(rawActions);
+      actions.forEach(function (delayedAction, i) {
         if (typeof delayedAction !== 'function' || delayedAction.type !== TYPES.DELAYED_ACTION) {
           throw new Error('Invalid Action recieved in CallActions. Expecting a Delayed Action');
         }
 
-        return Object.assign(acc, delayedAction(acc, i === actions.length - 1) || {});
-      }, _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)); //update current store and notify everyone
+        delayedAction(i === actions.length - 1);
+      }); //notify everyone
 
-      _classStaticPrivateMethodGet(Redux, Redux, _updateState).call(Redux, newStore);
+      EventEmitter.emit(EVENTS.UPDATE, _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store));
     }
   }, {
     key: "callEpic",
@@ -498,17 +510,6 @@ function _getInstance() {
   return _classStaticPrivateFieldSpecGet(Redux, Redux, _instance);
 }
 
-function _updateState() {
-  var newStore = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  Object.assign(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store), newStore);
-
-  _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _listeners).forEach(function (listener) {
-    if (typeof listener === 'function') {
-      listener(newStore);
-    }
-  });
-}
-
 var _instance = {
   writable: true,
   value: void 0
@@ -524,16 +525,347 @@ module.exports = Redux;
 
 /***/ }),
 
-/***/ 456:
+/***/ 729:
 /***/ ((module) => {
 
-function clone(input) {
-  return JSON.parse(JSON.stringify(input));
+"use strict";
+
+
+var has = Object.prototype.hasOwnProperty
+  , prefix = '~';
+
+/**
+ * Constructor to create a storage for our `EE` objects.
+ * An `Events` instance is a plain object whose properties are event names.
+ *
+ * @constructor
+ * @private
+ */
+function Events() {}
+
+//
+// We try to not inherit from `Object.prototype`. In some engines creating an
+// instance in this way is faster than calling `Object.create(null)` directly.
+// If `Object.create(null)` is not supported we prefix the event names with a
+// character to make sure that the built-in object properties are not
+// overridden or used as an attack vector.
+//
+if (Object.create) {
+  Events.prototype = Object.create(null);
+
+  //
+  // This hack is needed because the `__proto__` property is still inherited in
+  // some old browsers like Android 4, iPhone 5.1, Opera 11 and Safari 5.
+  //
+  if (!new Events().__proto__) prefix = false;
 }
 
-module.exports = {
-  clone: clone
+/**
+ * Representation of a single event listener.
+ *
+ * @param {Function} fn The listener function.
+ * @param {*} context The context to invoke the listener with.
+ * @param {Boolean} [once=false] Specify if the listener is a one-time listener.
+ * @constructor
+ * @private
+ */
+function EE(fn, context, once) {
+  this.fn = fn;
+  this.context = context;
+  this.once = once || false;
+}
+
+/**
+ * Add a listener for a given event.
+ *
+ * @param {EventEmitter} emitter Reference to the `EventEmitter` instance.
+ * @param {(String|Symbol)} event The event name.
+ * @param {Function} fn The listener function.
+ * @param {*} context The context to invoke the listener with.
+ * @param {Boolean} once Specify if the listener is a one-time listener.
+ * @returns {EventEmitter}
+ * @private
+ */
+function addListener(emitter, event, fn, context, once) {
+  if (typeof fn !== 'function') {
+    throw new TypeError('The listener must be a function');
+  }
+
+  var listener = new EE(fn, context || emitter, once)
+    , evt = prefix ? prefix + event : event;
+
+  if (!emitter._events[evt]) emitter._events[evt] = listener, emitter._eventsCount++;
+  else if (!emitter._events[evt].fn) emitter._events[evt].push(listener);
+  else emitter._events[evt] = [emitter._events[evt], listener];
+
+  return emitter;
+}
+
+/**
+ * Clear event by name.
+ *
+ * @param {EventEmitter} emitter Reference to the `EventEmitter` instance.
+ * @param {(String|Symbol)} evt The Event name.
+ * @private
+ */
+function clearEvent(emitter, evt) {
+  if (--emitter._eventsCount === 0) emitter._events = new Events();
+  else delete emitter._events[evt];
+}
+
+/**
+ * Minimal `EventEmitter` interface that is molded against the Node.js
+ * `EventEmitter` interface.
+ *
+ * @constructor
+ * @public
+ */
+function EventEmitter() {
+  this._events = new Events();
+  this._eventsCount = 0;
+}
+
+/**
+ * Return an array listing the events for which the emitter has registered
+ * listeners.
+ *
+ * @returns {Array}
+ * @public
+ */
+EventEmitter.prototype.eventNames = function eventNames() {
+  var names = []
+    , events
+    , name;
+
+  if (this._eventsCount === 0) return names;
+
+  for (name in (events = this._events)) {
+    if (has.call(events, name)) names.push(prefix ? name.slice(1) : name);
+  }
+
+  if (Object.getOwnPropertySymbols) {
+    return names.concat(Object.getOwnPropertySymbols(events));
+  }
+
+  return names;
 };
+
+/**
+ * Return the listeners registered for a given event.
+ *
+ * @param {(String|Symbol)} event The event name.
+ * @returns {Array} The registered listeners.
+ * @public
+ */
+EventEmitter.prototype.listeners = function listeners(event) {
+  var evt = prefix ? prefix + event : event
+    , handlers = this._events[evt];
+
+  if (!handlers) return [];
+  if (handlers.fn) return [handlers.fn];
+
+  for (var i = 0, l = handlers.length, ee = new Array(l); i < l; i++) {
+    ee[i] = handlers[i].fn;
+  }
+
+  return ee;
+};
+
+/**
+ * Return the number of listeners listening to a given event.
+ *
+ * @param {(String|Symbol)} event The event name.
+ * @returns {Number} The number of listeners.
+ * @public
+ */
+EventEmitter.prototype.listenerCount = function listenerCount(event) {
+  var evt = prefix ? prefix + event : event
+    , listeners = this._events[evt];
+
+  if (!listeners) return 0;
+  if (listeners.fn) return 1;
+  return listeners.length;
+};
+
+/**
+ * Calls each of the listeners registered for a given event.
+ *
+ * @param {(String|Symbol)} event The event name.
+ * @returns {Boolean} `true` if the event had listeners, else `false`.
+ * @public
+ */
+EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
+  var evt = prefix ? prefix + event : event;
+
+  if (!this._events[evt]) return false;
+
+  var listeners = this._events[evt]
+    , len = arguments.length
+    , args
+    , i;
+
+  if (listeners.fn) {
+    if (listeners.once) this.removeListener(event, listeners.fn, undefined, true);
+
+    switch (len) {
+      case 1: return listeners.fn.call(listeners.context), true;
+      case 2: return listeners.fn.call(listeners.context, a1), true;
+      case 3: return listeners.fn.call(listeners.context, a1, a2), true;
+      case 4: return listeners.fn.call(listeners.context, a1, a2, a3), true;
+      case 5: return listeners.fn.call(listeners.context, a1, a2, a3, a4), true;
+      case 6: return listeners.fn.call(listeners.context, a1, a2, a3, a4, a5), true;
+    }
+
+    for (i = 1, args = new Array(len -1); i < len; i++) {
+      args[i - 1] = arguments[i];
+    }
+
+    listeners.fn.apply(listeners.context, args);
+  } else {
+    var length = listeners.length
+      , j;
+
+    for (i = 0; i < length; i++) {
+      if (listeners[i].once) this.removeListener(event, listeners[i].fn, undefined, true);
+
+      switch (len) {
+        case 1: listeners[i].fn.call(listeners[i].context); break;
+        case 2: listeners[i].fn.call(listeners[i].context, a1); break;
+        case 3: listeners[i].fn.call(listeners[i].context, a1, a2); break;
+        case 4: listeners[i].fn.call(listeners[i].context, a1, a2, a3); break;
+        default:
+          if (!args) for (j = 1, args = new Array(len -1); j < len; j++) {
+            args[j - 1] = arguments[j];
+          }
+
+          listeners[i].fn.apply(listeners[i].context, args);
+      }
+    }
+  }
+
+  return true;
+};
+
+/**
+ * Add a listener for a given event.
+ *
+ * @param {(String|Symbol)} event The event name.
+ * @param {Function} fn The listener function.
+ * @param {*} [context=this] The context to invoke the listener with.
+ * @returns {EventEmitter} `this`.
+ * @public
+ */
+EventEmitter.prototype.on = function on(event, fn, context) {
+  return addListener(this, event, fn, context, false);
+};
+
+/**
+ * Add a one-time listener for a given event.
+ *
+ * @param {(String|Symbol)} event The event name.
+ * @param {Function} fn The listener function.
+ * @param {*} [context=this] The context to invoke the listener with.
+ * @returns {EventEmitter} `this`.
+ * @public
+ */
+EventEmitter.prototype.once = function once(event, fn, context) {
+  return addListener(this, event, fn, context, true);
+};
+
+/**
+ * Remove the listeners of a given event.
+ *
+ * @param {(String|Symbol)} event The event name.
+ * @param {Function} fn Only remove the listeners that match this function.
+ * @param {*} context Only remove the listeners that have this context.
+ * @param {Boolean} once Only remove one-time listeners.
+ * @returns {EventEmitter} `this`.
+ * @public
+ */
+EventEmitter.prototype.removeListener = function removeListener(event, fn, context, once) {
+  var evt = prefix ? prefix + event : event;
+
+  if (!this._events[evt]) return this;
+  if (!fn) {
+    clearEvent(this, evt);
+    return this;
+  }
+
+  var listeners = this._events[evt];
+
+  if (listeners.fn) {
+    if (
+      listeners.fn === fn &&
+      (!once || listeners.once) &&
+      (!context || listeners.context === context)
+    ) {
+      clearEvent(this, evt);
+    }
+  } else {
+    for (var i = 0, events = [], length = listeners.length; i < length; i++) {
+      if (
+        listeners[i].fn !== fn ||
+        (once && !listeners[i].once) ||
+        (context && listeners[i].context !== context)
+      ) {
+        events.push(listeners[i]);
+      }
+    }
+
+    //
+    // Reset the array, or remove it completely if we have no more listeners.
+    //
+    if (events.length) this._events[evt] = events.length === 1 ? events[0] : events;
+    else clearEvent(this, evt);
+  }
+
+  return this;
+};
+
+/**
+ * Remove all listeners, or those of the specified event.
+ *
+ * @param {(String|Symbol)} [event] The event name.
+ * @returns {EventEmitter} `this`.
+ * @public
+ */
+EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
+  var evt;
+
+  if (event) {
+    evt = prefix ? prefix + event : event;
+    if (this._events[evt]) clearEvent(this, evt);
+  } else {
+    this._events = new Events();
+    this._eventsCount = 0;
+  }
+
+  return this;
+};
+
+//
+// Alias methods names because people roll like that.
+//
+EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
+EventEmitter.prototype.addListener = EventEmitter.prototype.on;
+
+//
+// Expose the prefix.
+//
+EventEmitter.prefixed = prefix;
+
+//
+// Allow `EventEmitter` to be imported as module namespace.
+//
+EventEmitter.EventEmitter = EventEmitter;
+
+//
+// Expose the module.
+//
+if (true) {
+  module.exports = EventEmitter;
+}
+
 
 /***/ })
 

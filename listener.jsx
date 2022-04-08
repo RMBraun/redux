@@ -1,4 +1,5 @@
 const React = require('react')
+const { shallowCompare } = require('./utils')
 
 var Redux
 
@@ -23,8 +24,12 @@ function listen(pickerFunc, Component) {
     React.useEffect(() => {
       var propListener = typeof propListener === 'undefined' ? null : propListener
       if (propListener == null) {
-        propListener = newStore => {
-          setState(propSelectFunction(newStore))
+        propListener = newState => {
+          //Only update state if the state has changed
+          //Performing a shallow comparison
+          if (!shallowCompare(state, newState)) {
+            setState(propSelectFunction(newState))
+          }
         }
 
         Redux.addChangeListener(propListener)

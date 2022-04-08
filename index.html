@@ -2,9 +2,23 @@
   <head>
     <script src="dist/redux.js"></script>
     <script src="dist/redux.devtool.loader.js" data-devtool-script="dist/redux.devtool.js"></script>
+  </head>
+  <body>
+    <button onclick="buttonClick()">click me</button>
+    <button onclick="buttonMultiClick()">click me</button>
+    <pre id="text"></pre>
+
     <script type="text/javascript">
       const storeOneId = 'storeOne'
       Redux.init({ [storeOneId]: { count: 0 } })
+
+      Redux.addChangeListener(newState => {
+        const bodyText = document.getElementById('text')
+        if (bodyText) {
+          bodyText.innerHTML = JSON.stringify(newState, null, 2)
+        }
+      })
+
       Redux.createActions(storeOneId, {
         one: store => {
           store[storeOneId].count = (store[storeOneId].count || 0) + 1
@@ -66,9 +80,5 @@
         ])
       }
     </script>
-  </head>
-  <body>
-    <button onclick="buttonClick()">click me</button>
-    <button onclick="buttonMultiClick()">click me</button>
   </body>
 </html>

@@ -7,9 +7,7 @@ class Reducer {
     } else if (typeof window !== 'undefined') {
       this.Redux = window.Redux
     } else {
-      throw new Error(
-        'A Redux instance must be provided either globally via the window Object or manually via the init()'
-      )
+      throw new Error('A Redux instance must be provided either globally via the window Object')
     }
   }
 

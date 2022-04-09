@@ -10,6 +10,8 @@ const baseConfig = {
     path.join(__dirname, 'pick.js'),
     path.join(__dirname, 'redux.devtool.loader.js'),
     path.join(__dirname, 'redux.devtool.jsx'),
+    path.join(__dirname, 'utils.js'),
+    path.join(__dirname, 'const.js'),
   ].reduce((entries, source) => {
     entries[path.basename(source).replace('.jsx', '').replace('.js', '')] = source
 

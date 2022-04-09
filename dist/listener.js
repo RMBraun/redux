@@ -142,6 +142,7 @@ function listen(pickerFunc, Component) {
       getInitialState = _Redux$initChangeList.getInitialState,
       propSelectFunction = _Redux$initChangeList.propSelectFunction;
 
+  var MemoizedComponent = React.memo(Component);
   return React.forwardRef(function ReduxWrapper(props, forwardedRef) {
     var _React$useState = React.useState(getInitialState()),
         _React$useState2 = _slicedToArray(_React$useState, 2),
@@ -167,7 +168,7 @@ function listen(pickerFunc, Component) {
         Redux.removeChangeListener(propListener);
       };
     }, []);
-    return React.createElement(Component, _objectSpread(_objectSpread({
+    return React.createElement(MemoizedComponent, _objectSpread(_objectSpread({
       ref: forwardedRef
     }, state), props));
   });

@@ -1,15 +1,7 @@
 const EE = require('eventemitter3')
-const { EVENTS } = require('./const')
-
-const EventEmitter = new EE()
-
-const TYPES = {
-  EPIC: 'Epic',
-  ACTION: 'Action',
-  DELAYED_ACTION: 'DelayedAction',
-}
-
+const { EVENTS, TYPES } = require('./const')
 class Redux {
+  #EventEmitter
   #store
   #actionListeners
   #actions
@@ -21,6 +13,16 @@ class Redux {
     this.#actionListeners = new Map()
     this.#actions = {}
     this.#epics = {}
+    this.#EventEmitter = new EE()
+
+    //add event listener for actions
+    this.#EventEmitter.on(EVENTS.ACTION, action => {
+      action()
+    })
+  }
+
+  static getEventEmitter() {
+    return Redux.#getInstance().#EventEmitter
   }
 
   static #getInstance() {
@@ -66,14 +68,14 @@ class Redux {
 
   static addChangeListener(changeListener) {
     if (typeof changeListener === 'function') {
-      EventEmitter.addListener(EVENTS.UPDATE, changeListener)
+      Redux.#getInstance().#EventEmitter.addListener(EVENTS.UPDATE, changeListener)
     } else {
       throw new Error('Change listener must be of type function')
     }
   }
 
   static removeChangeListener(changeListener) {
-    EventEmitter.removeListener(EVENTS.UPDATE, changeListener)
+    Redux.#getInstance().#EventEmitter.removeListener(EVENTS.UPDATE, changeListener)
   }
 
   /*
@@ -106,7 +108,7 @@ class Redux {
     const type = changeListener && changeListener.constructor && changeListener.constructor.name
 
     if (type === Function.name) {
-      EventEmitter.addListener(EVENTS.ACTION, changeListener)
+      Redux.#getInstance().#EventEmitter.addListener(EVENTS.ACTION_LISTENER, changeListener)
     } else if (type === Object.name) {
       Object.entries(changeListener).forEach(([key, callback]) => {
         if (callback == null) {
@@ -131,7 +133,7 @@ class Redux {
 
       Redux.#getInstance().#actionListeners.set(changeListener, actionListenerMapFunc)
 
-      EventEmitter.addListener(EVENTS.ACTION, actionListenerMapFunc)
+      Redux.#getInstance().#EventEmitter.addListener(EVENTS.ACTION_LISTENER, actionListenerMapFunc)
     } else if (type === Array.name) {
       changeListener.forEach((listener, i) => {
         if (listener == null) {
@@ -170,7 +172,7 @@ class Redux {
 
       Redux.#getInstance().#actionListeners.set(changeListener, actionListenerMapFunc)
 
-      EventEmitter.addListener(EVENTS.ACTION, actionListenerMapFunc)
+      Redux.#getInstance().#EventEmitter.addListener(EVENTS.ACTION_LISTENER, actionListenerMapFunc)
     } else {
       throw new Error('Action listener must be of type function, object, or array')
     }
@@ -178,7 +180,10 @@ class Redux {
 
   static removeActionListener(changeListener) {
     if (Redux.#getInstance().#actionListeners.has(changeListener)) {
-      EventEmitter.removeListener(EVENTS.ACTION, Redux.#getInstance().#actionListeners.get(changeListener))
+      Redux.#getInstance().#EventEmitter.removeListener(
+        EVENTS.ACTION_LISTENER,
+        Redux.#getInstance().#actionListeners.get(changeListener)
+      )
 
       Redux.#getInstance().#actionListeners.delete(changeListener)
     }
@@ -191,12 +196,12 @@ class Redux {
 
     const actionId = func.name || actionName
 
-    const action = function (payload, isDelayed = false, isLast = false) {
+    const rawAction = function (payload, isDelayed = false, isLast = false) {
       //get new store
       const newStore = func(Redux.#getInstance().#store, payload)
 
       //send new action log to listeners
-      EventEmitter.emit(EVENTS.ACTION, {
+      Redux.#getInstance().#EventEmitter.emit(EVENTS.ACTION_LISTENER, {
         id: actionId,
         storeId: reduxId,
         type: TYPES.ACTION,
@@ -210,11 +215,14 @@ class Redux {
 
       if (!isDelayed) {
         //notify everyone
-        EventEmitter.emit(EVENTS.UPDATE, newStore)
+        Redux.#getInstance().#EventEmitter.emit(EVENTS.UPDATE, newStore)
       } else {
         //return the new store
         return newStore
       }
+    }
+    const action = function(...props) {
+      Redux.#getInstance().#EventEmitter.emit(EVENTS.ACTION, () => rawAction(...props))
     }
 
     //add prototype toString so that it resolves to the actionId
@@ -253,11 +261,11 @@ class Redux {
 
     const epicId = func.name || actionName
 
-    const epic = function (payload) {
+    const rawEpic = function (payload) {
       const store = Redux.#getInstance().#store
 
       //send new action log to listeners
-      EventEmitter.emit(EVENTS.ACTION, {
+      Redux.#getInstance().#EventEmitter.emit(EVENTS.ACTION_LISTENER, {
         id: epicId,
         storeId: reduxId,
         type: TYPES.EPIC,
@@ -267,6 +275,10 @@ class Redux {
       })
 
       func(store, payload)
+    }
+
+    const epic = function(...props) {
+      Redux.#getInstance().#EventEmitter.emit(EVENTS.ACTION, () => rawEpic(...props))
     }
 
     //add prototype toString so that it resolves to the actionId
@@ -338,7 +350,7 @@ class Redux {
     })
 
     //notify everyone
-    EventEmitter.emit(EVENTS.UPDATE, Redux.#getInstance().#store)
+    Redux.#getInstance().#EventEmitter.emit(EVENTS.UPDATE, Redux.#getInstance().#store)
   }
 
   static callEpic(reduxId, epicId, payload) {

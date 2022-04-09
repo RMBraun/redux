@@ -38,6 +38,7 @@ function shallowCompare(a, b) {
   return true
 }
 
+
 module.exports = {
   clone,
   shallowCompare,

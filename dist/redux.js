@@ -7,7 +7,13 @@
 module.exports = {
   EVENTS: {
     UPDATE: '@rybr:redux:updateState',
-    ACTION: '@rybr:redux:action'
+    ACTION: '@rybr:redux:action',
+    ACTION_LISTENER: '@rybr:redux:actionListener'
+  },
+  TYPES: {
+    EPIC: 'Epic',
+    ACTION: 'Action',
+    DELAYED_ACTION: 'DelayedAction'
   }
 };
 
@@ -42,17 +48,17 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-function _classPrivateFieldGet(receiver, privateMap) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
-
-function _classStaticPrivateMethodGet(receiver, classConstructor, method) { _classCheckPrivateStaticAccess(receiver, classConstructor); return method; }
-
 function _classStaticPrivateFieldSpecSet(receiver, classConstructor, descriptor, value) { _classCheckPrivateStaticAccess(receiver, classConstructor); _classCheckPrivateStaticFieldDescriptor(descriptor, "set"); _classApplyDescriptorSet(receiver, descriptor, value); return value; }
 
 function _classStaticPrivateFieldSpecGet(receiver, classConstructor, descriptor) { _classCheckPrivateStaticAccess(receiver, classConstructor); _classCheckPrivateStaticFieldDescriptor(descriptor, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
 
 function _classCheckPrivateStaticFieldDescriptor(descriptor, action) { if (descriptor === undefined) { throw new TypeError("attempted to " + action + " private static field before its declaration"); } }
 
+function _classStaticPrivateMethodGet(receiver, classConstructor, method) { _classCheckPrivateStaticAccess(receiver, classConstructor); return method; }
+
 function _classCheckPrivateStaticAccess(receiver, classConstructor) { if (receiver !== classConstructor) { throw new TypeError("Private static access of wrong provenance"); } }
+
+function _classPrivateFieldGet(receiver, privateMap) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
 
 function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
 
@@ -65,14 +71,10 @@ function _classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.
 var EE = __webpack_require__(729);
 
 var _require = __webpack_require__(104),
-    EVENTS = _require.EVENTS;
+    EVENTS = _require.EVENTS,
+    TYPES = _require.TYPES;
 
-var EventEmitter = new EE();
-var TYPES = {
-  EPIC: 'Epic',
-  ACTION: 'Action',
-  DELAYED_ACTION: 'DelayedAction'
-};
+var _EventEmitter = /*#__PURE__*/new WeakMap();
 
 var _store = /*#__PURE__*/new WeakMap();
 
@@ -85,6 +87,11 @@ var _epics = /*#__PURE__*/new WeakMap();
 var Redux = /*#__PURE__*/function () {
   function Redux() {
     _classCallCheck(this, Redux);
+
+    _EventEmitter.set(this, {
+      writable: true,
+      value: void 0
+    });
 
     _store.set(this, {
       writable: true,
@@ -113,9 +120,21 @@ var Redux = /*#__PURE__*/function () {
     _classPrivateFieldSet(this, _actions, {});
 
     _classPrivateFieldSet(this, _epics, {});
+
+    _classPrivateFieldSet(this, _EventEmitter, new EE()); //add event listener for actions
+
+
+    _classPrivateFieldGet(this, _EventEmitter).on(EVENTS.ACTION, function (action) {
+      action();
+    });
   }
 
   _createClass(Redux, null, [{
+    key: "getEventEmitter",
+    value: function getEventEmitter() {
+      return _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _EventEmitter);
+    }
+  }, {
     key: "getStore",
     value: function getStore(reduxId) {
       var store = reduxId ? _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store)[reduxId] : _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store);
@@ -165,7 +184,7 @@ var Redux = /*#__PURE__*/function () {
     key: "addChangeListener",
     value: function addChangeListener(changeListener) {
       if (typeof changeListener === 'function') {
-        EventEmitter.addListener(EVENTS.UPDATE, changeListener);
+        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _EventEmitter).addListener(EVENTS.UPDATE, changeListener);
       } else {
         throw new Error('Change listener must be of type function');
       }
@@ -173,7 +192,7 @@ var Redux = /*#__PURE__*/function () {
   }, {
     key: "removeChangeListener",
     value: function removeChangeListener(changeListener) {
-      EventEmitter.removeListener(EVENTS.UPDATE, changeListener);
+      _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _EventEmitter).removeListener(EVENTS.UPDATE, changeListener);
     }
     /*
     example usages:
@@ -205,7 +224,7 @@ var Redux = /*#__PURE__*/function () {
       var type = changeListener && changeListener.constructor && changeListener.constructor.name;
 
       if (type === Function.name) {
-        EventEmitter.addListener(EVENTS.ACTION, changeListener);
+        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _EventEmitter).addListener(EVENTS.ACTION_LISTENER, changeListener);
       } else if (type === Object.name) {
         Object.entries(changeListener).forEach(function (_ref) {
           var _ref2 = _slicedToArray(_ref, 2),
@@ -235,7 +254,7 @@ var Redux = /*#__PURE__*/function () {
 
         _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).set(changeListener, actionListenerMapFunc);
 
-        EventEmitter.addListener(EVENTS.ACTION, actionListenerMapFunc);
+        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _EventEmitter).addListener(EVENTS.ACTION_LISTENER, actionListenerMapFunc);
       } else if (type === Array.name) {
         changeListener.forEach(function (listener, i) {
           if (listener == null) {
@@ -276,7 +295,7 @@ var Redux = /*#__PURE__*/function () {
 
         _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).set(changeListener, _actionListenerMapFunc);
 
-        EventEmitter.addListener(EVENTS.ACTION, _actionListenerMapFunc);
+        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _EventEmitter).addListener(EVENTS.ACTION_LISTENER, _actionListenerMapFunc);
       } else {
         throw new Error('Action listener must be of type function, object, or array');
       }
@@ -285,7 +304,7 @@ var Redux = /*#__PURE__*/function () {
     key: "removeActionListener",
     value: function removeActionListener(changeListener) {
       if (_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).has(changeListener)) {
-        EventEmitter.removeListener(EVENTS.ACTION, _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).get(changeListener));
+        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _EventEmitter).removeListener(EVENTS.ACTION_LISTENER, _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).get(changeListener));
 
         _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actionListeners).delete(changeListener);
       }
@@ -301,13 +320,13 @@ var Redux = /*#__PURE__*/function () {
 
       var actionId = func.name || actionName;
 
-      var action = function action(payload) {
+      var rawAction = function rawAction(payload) {
         var isDelayed = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
         var isLast = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
         //get new store
         var newStore = func(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store), payload); //send new action log to listeners
 
-        EventEmitter.emit(EVENTS.ACTION, {
+        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _EventEmitter).emit(EVENTS.ACTION_LISTENER, {
           id: actionId,
           storeId: reduxId,
           type: TYPES.ACTION,
@@ -322,11 +341,21 @@ var Redux = /*#__PURE__*/function () {
 
         if (!isDelayed) {
           //notify everyone
-          EventEmitter.emit(EVENTS.UPDATE, newStore);
+          _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _EventEmitter).emit(EVENTS.UPDATE, newStore);
         } else {
           //return the new store
           return newStore;
         }
+      };
+
+      var action = function action() {
+        for (var _len = arguments.length, props = new Array(_len), _key = 0; _key < _len; _key++) {
+          props[_key] = arguments[_key];
+        }
+
+        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _EventEmitter).emit(EVENTS.ACTION, function () {
+          return rawAction.apply(void 0, props);
+        });
       }; //add prototype toString so that it resolves to the actionId
 
 
@@ -381,11 +410,11 @@ var Redux = /*#__PURE__*/function () {
 
       var epicId = func.name || actionName;
 
-      var epic = function epic(payload) {
+      var rawEpic = function rawEpic(payload) {
         var store = _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store); //send new action log to listeners
 
 
-        EventEmitter.emit(EVENTS.ACTION, {
+        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _EventEmitter).emit(EVENTS.ACTION_LISTENER, {
           id: epicId,
           storeId: reduxId,
           type: TYPES.EPIC,
@@ -393,7 +422,18 @@ var Redux = /*#__PURE__*/function () {
           payload: payload,
           store: store
         });
+
         func(store, payload);
+      };
+
+      var epic = function epic() {
+        for (var _len2 = arguments.length, props = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+          props[_key2] = arguments[_key2];
+        }
+
+        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _EventEmitter).emit(EVENTS.ACTION, function () {
+          return rawEpic.apply(void 0, props);
+        });
       }; //add prototype toString so that it resolves to the actionId
 
 
@@ -481,7 +521,7 @@ var Redux = /*#__PURE__*/function () {
         delayedAction(i === actions.length - 1);
       }); //notify everyone
 
-      EventEmitter.emit(EVENTS.UPDATE, _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store));
+      _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _EventEmitter).emit(EVENTS.UPDATE, _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store));
     }
   }, {
     key: "callEpic",

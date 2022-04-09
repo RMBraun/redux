@@ -18,6 +18,8 @@ function listen(pickerFunc, Component) {
 
   const { getInitialState, propSelectFunction } = Redux.initChangeListener(pickerFunc)
 
+  const MemoizedComponent = React.memo(Component)
+
   return React.forwardRef(function ReduxWrapper(props, forwardedRef) {
     const [state, setState] = React.useState(getInitialState())
 
@@ -40,7 +42,7 @@ function listen(pickerFunc, Component) {
       }
     }, [])
 
-    return React.createElement(Component, {
+    return React.createElement(MemoizedComponent, {
       ref: forwardedRef,
       ...state,
       ...props,

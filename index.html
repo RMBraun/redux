@@ -4,20 +4,19 @@
     <script src="dist/redux.devtool.loader.js" data-devtool-script="dist/redux.devtool.js"></script>
   </head>
   <body>
-    <button onclick="buttonClick()">click me</button>
-    <button onclick="buttonMultiClick()">click me</button>
+    <button onclick="buttonClick()">Action click</button>
+    <button onclick="buttonMultiClick()">Bulk action call</button>
+    <button onclick="buttonConcurrencyTest(10)">200 Actions with 10ms intervals</button>
+    <button onclick="buttonConcurrencyTest(0)">200 Actions with 0ms intervals</button>
+    <button onclick="buttonEpic()">Epic click</button>
+    <button onclick="buttonEpicConcurrencyTest(10)">Epic + Action Concurrency with 10ms intervals</button>
+    <button onclick="buttonEpicConcurrencyTest(0)">Epic + Action Concurrency with 0ms intervals</button>
+
     <pre id="text"></pre>
 
     <script type="text/javascript">
       const storeOneId = 'storeOne'
       Redux.init({ [storeOneId]: { count: 0 } })
-
-      Redux.addChangeListener(newState => {
-        const bodyText = document.getElementById('text')
-        if (bodyText) {
-          bodyText.innerHTML = JSON.stringify(newState, null, 2)
-        }
-      })
 
       Redux.createActions(storeOneId, {
         one: store => {
@@ -79,6 +78,57 @@
           Redux.chainAction(storeTwoId, 'sub', 7),
         ])
       }
+
+      const storeFourId = 'storeFourId'
+      Redux.init({ [storeFourId]: { count: 0 } })
+      const storeFourACtions = Redux.createActions(storeFourId, {
+        one: store => {
+          store[storeFourId].count++
+
+          return store
+        },
+      })
+
+      function buttonConcurrencyTest(delay) {
+        for(let i = 0; i < 200; i++) {
+          setTimeout(() => {
+            storeFourACtions.one(i)
+          }, delay * i)
+        }
+      }
+
+      const Epics = Redux.createEpics(storeFourId, {
+        one: (store, payload) => {
+          console.log(`Epic(${payload}): `, store[storeFourId].count)
+        }
+      })
+      function buttonEpic() {
+        Epics.one()
+      }
+
+      function buttonEpicConcurrencyTest(delay) {
+        for(let i = 0; i < 200; i++) {
+          setTimeout(() => {
+            if(i % 5 === 0) {
+              Epics.one(i)
+            }
+
+            storeFourACtions.one(i)
+
+            if(i % 5 === 0) {
+              Epics.one(i)
+            }
+          }, delay * i)
+        }
+      }
+
+      const bodyText = document.getElementById('text')
+      bodyText.innerHTML = JSON.stringify(Redux.getStore(), null, 2)
+
+      Redux.addChangeListener(newState => {
+        const bodyText = document.getElementById('text')
+        bodyText.innerHTML = JSON.stringify(newState, null, 2)
+      })
     </script>
   </body>
 </html>

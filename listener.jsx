@@ -30,7 +30,7 @@ function listen(pickerFunc, Component) {
           //Only update state if the state has changed
           //Performing a shallow comparison
           if (!shallowCompare(state, newState)) {
-            setState(propSelectFunction(newState))
+            setState(propSelectFunction(newState, props))
           }
         }
 

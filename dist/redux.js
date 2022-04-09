@@ -165,10 +165,10 @@ var Redux = /*#__PURE__*/function () {
   }, {
     key: "initChangeListener",
     value: function initChangeListener(pickerFunc) {
-      var propSelectFunction = function propSelectFunction(newStore) {
+      var propSelectFunction = function propSelectFunction() {
         return (pickerFunc || function (a) {
           return a;
-        })(newStore) || {};
+        }).apply(void 0, arguments) || {};
       };
 
       var getInitialState = function getInitialState() {

@@ -57,7 +57,7 @@ class Redux {
   }
 
   static initChangeListener(pickerFunc) {
-    const propSelectFunction = newStore => (pickerFunc || (a => a))(newStore) || {}
+    const propSelectFunction = (...props) => (pickerFunc || (a => a))(...props) || {}
     const getInitialState = () => propSelectFunction(Redux.#getInstance().#store)
 
     return {

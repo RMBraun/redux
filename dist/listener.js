@@ -140,7 +140,8 @@ function listen(pickerFunc, Component) {
 
   var _Redux$initChangeList = Redux.initChangeListener(pickerFunc),
       getInitialState = _Redux$initChangeList.getInitialState,
-      propSelectFunction = _Redux$initChangeList.propSelectFunction;
+      propSelectFunction = _Redux$initChangeList.propSelectFunction; //TODO remove memo? This is causing shallow compares to prevent re-rendering
+
 
   var MemoizedComponent = React.memo(Component);
   return React.forwardRef(function ReduxWrapper(props, forwardedRef) {
@@ -157,7 +158,7 @@ function listen(pickerFunc, Component) {
           //Only update state if the state has changed
           //Performing a shallow comparison
           if (!shallowCompare(state, newState)) {
-            setState(propSelectFunction(newState, props));
+            setState(propSelectFunction(newState, _objectSpread({}, props)));
           }
         };
 

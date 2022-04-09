@@ -171,8 +171,8 @@ var Redux = /*#__PURE__*/function () {
         }).apply(void 0, arguments) || {};
       };
 
-      var getInitialState = function getInitialState() {
-        return propSelectFunction(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store));
+      var getInitialState = function getInitialState(props) {
+        return propSelectFunction(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _store), props);
       };
 
       return {

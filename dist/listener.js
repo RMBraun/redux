@@ -145,7 +145,7 @@ function listen(pickerFunc, Component) {
 
   var MemoizedComponent = React.memo(Component);
   return React.forwardRef(function ReduxWrapper(props, forwardedRef) {
-    var _React$useState = React.useState(getInitialState()),
+    var _React$useState = React.useState(getInitialState(_objectSpread({}, props))),
         _React$useState2 = _slicedToArray(_React$useState, 2),
         state = _React$useState2[0],
         setState = _React$useState2[1];

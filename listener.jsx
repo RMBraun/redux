@@ -22,7 +22,7 @@ function listen(pickerFunc, Component) {
   const MemoizedComponent = React.memo(Component)
 
   return React.forwardRef(function ReduxWrapper(props, forwardedRef) {
-    const [state, setState] = React.useState(getInitialState())
+    const [state, setState] = React.useState(getInitialState({ ...props }))
 
     React.useEffect(() => {
       var propListener = typeof propListener === 'undefined' ? null : propListener

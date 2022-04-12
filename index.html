@@ -1,7 +1,9 @@
 <html>
   <head>
+    <script src="dist/test.min.js"></script>
+
     <script src="dist/redux.js"></script>
-    <script src="dist/redux.devtool.loader.js" data-devtool-script="dist/redux.devtool.js"></script>
+    <!-- <script src="dist/redux.devtool.loader.js" data-devtool-script="dist/redux.devtool.js"></script> -->
   </head>
   <body>
     <button onclick="buttonClick()">Action click</button>
@@ -15,21 +17,20 @@
     <pre id="text"></pre>
 
     <script type="text/javascript">
+      'use strict' 
+
       const storeOneId = 'storeOne'
       Redux.init({ [storeOneId]: { count: 0 } })
 
       Redux.createActions(storeOneId, {
         one: store => {
           store[storeOneId].count = (store[storeOneId].count || 0) + 1
-          return store
         },
         two: store => {
           store[storeOneId].count = (store[storeOneId].count || 0) + 2
-          return store
         },
         add: (store, payload) => {
           store[storeOneId].count = (store[storeOneId].count || 0) + payload
-          return store
         },
       })
 
@@ -38,15 +39,12 @@
       Redux.createActions(storeTwoId, {
         one: store => {
           store[storeTwoId].backCount = (store[storeTwoId].backCount || 99) - 1
-          return store
         },
         two: store => {
           store[storeTwoId].backCount = (store[storeTwoId].backCount || 99) - 2
-          return store
         },
         sub: (store, payload) => {
           store[storeOneId].count = (store[storeOneId].count || 0) - payload
-          return store
         },
       })
 
@@ -62,7 +60,6 @@
         multiStoreUpdates: store => {
           store[storeTwoId].backCount = (store[storeTwoId].backCount || 99) - 1
           store[storeOneId].count = (store[storeOneId].count || 0) + 1
-          return store
         },
       })
 
@@ -84,8 +81,6 @@
       const storeFourACtions = Redux.createActions(storeFourId, {
         one: store => {
           store[storeFourId].count++
-
-          return store
         },
       })
 
@@ -103,7 +98,7 @@
         }
       })
       function buttonEpic() {
-        Epics.one()
+        Epics.one('button click')
       }
 
       function buttonEpicConcurrencyTest(delay) {
@@ -114,12 +109,9 @@
             }
 
             storeFourACtions.one(i)
-
-            if(i % 5 === 0) {
-              Epics.one(i)
-            }
           }, delay * i)
         }
+       
       }
 
       const bodyText = document.getElementById('text')

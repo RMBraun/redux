@@ -1,6 +1,6 @@
 {
   "name": "@rybr/redux",
-  "version": "2.1.4",
+  "version": "2.2.0",
   "description": "Simple implementation of redux for use with React and JS",
   "main": "redux.js",
   "scripts": {
@@ -34,7 +34,7 @@
     "@emotion/babel-plugin": "^11.1.2",
     "@emotion/react": "11.1.2",
     "@emotion/styled": "^11.0.0",
-    "@rybr/lenses": "1.0.23",
+    "@rybr/lenses": "^1.0.23",
     "babel-loader": "^8.2.2",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "css-loader": "^5.2.6",
@@ -47,6 +47,7 @@
     "webpack-cli": "^4.5.0"
   },
   "dependencies": {
-    "eventemitter3": "^4.0.7"
+    "eventemitter3": "^4.0.7",
+    "immer": "^9.0.12"
   }
 }

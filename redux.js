@@ -1,5 +1,6 @@
 const EE = require('eventemitter3')
 const { EVENTS, TYPES } = require('./const')
+const { produce } = require('immer')
 class Redux {
   #EventEmitter
   #store
@@ -53,7 +54,9 @@ class Redux {
       )
     }
 
-    Object.assign(Redux.#getInstance().#store, defaultState, initialState)
+    Redux.#getInstance().#store = produce(Redux.#getInstance().#store, draft => {
+      Object.assign(draft, defaultState, initialState)
+    })
   }
 
   static initChangeListener(pickerFunc) {
@@ -198,7 +201,8 @@ class Redux {
 
     const rawAction = function (payload, isDelayed = false, isLast = false) {
       //get new store
-      const newStore = func(Redux.#getInstance().#store, payload)
+      const newStore = produce(Redux.#getInstance().#store, draft => func(draft, payload))
+      Redux.#getInstance().#store = newStore
 
       //send new action log to listeners
       Redux.#getInstance().#EventEmitter.emit(EVENTS.ACTION_LISTENER, {
@@ -221,7 +225,7 @@ class Redux {
         return newStore
       }
     }
-    const action = function(...props) {
+    const action = function (...props) {
       Redux.#getInstance().#EventEmitter.emit(EVENTS.ACTION, () => rawAction(...props))
     }
 
@@ -277,7 +281,7 @@ class Redux {
       func(store, payload)
     }
 
-    const epic = function(...props) {
+    const epic = function (...props) {
       Redux.#getInstance().#EventEmitter.emit(EVENTS.ACTION, () => rawEpic(...props))
     }
 

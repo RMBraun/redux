@@ -12,7 +12,6 @@ class Reducer {
   }
 
   init(reduxId, actions = {}, initialState = {}) {
-    console.log('reducer being created')
     if (reduxId == null) {
       throw new Error('reduxId cannot be null')
     } else if (actions.constructor.name !== 'Object') {

@@ -17,8 +17,9 @@ class Redux {
     this.#EventEmitter = new EE()
 
     //add event listener for actions
-    this.#EventEmitter.on(EVENTS.ACTION, action => {
+    this.#EventEmitter.on(EVENTS.ACTION, (action, res) => {
       action()
+      res()
     })
   }
 
@@ -226,7 +227,9 @@ class Redux {
       }
     }
     const action = function (...props) {
-      Redux.#getInstance().#EventEmitter.emit(EVENTS.ACTION, () => rawAction(...props))
+      return new Promise(res => {
+        Redux.#getInstance().#EventEmitter.emit(EVENTS.ACTION, () => rawAction(...props), res)
+      })
     }
 
     //add prototype toString so that it resolves to the actionId

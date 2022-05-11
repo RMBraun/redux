@@ -21,13 +21,21 @@ function listen(pickerFunc, Component) {
   //TODO remove memo? This is causing shallow compares to prevent re-rendering
   const MemoizedComponent = React.memo(Component)
 
+  var isUnmounted = false
+
   return React.forwardRef(function ReduxWrapper(props, forwardedRef) {
     const [state, setState] = React.useState(getInitialState({ ...props }))
 
     React.useEffect(() => {
+      isUnmounted = false
       var propListener = typeof propListener === 'undefined' ? null : propListener
       if (propListener == null) {
         propListener = newState => {
+          //early abort if the component was unmounted or in the process of unmounting
+          if (isUnmounted) {
+            return
+          }
+
           //Only update state if the state has changed
           //Performing a shallow comparison
           if (!shallowCompare(state, newState)) {
@@ -39,6 +47,7 @@ function listen(pickerFunc, Component) {
       }
 
       return () => {
+        isUnmounted = true
         Redux.removeChangeListener(propListener)
       }
     }, [])

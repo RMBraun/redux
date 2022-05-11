@@ -144,6 +144,7 @@ function listen(pickerFunc, Component) {
 
 
   var MemoizedComponent = React.memo(Component);
+  var isUnmounted = false;
   return React.forwardRef(function ReduxWrapper(props, forwardedRef) {
     var _React$useState = React.useState(getInitialState(_objectSpread({}, props))),
         _React$useState2 = _slicedToArray(_React$useState, 2),
@@ -151,12 +152,18 @@ function listen(pickerFunc, Component) {
         setState = _React$useState2[1];
 
     React.useEffect(function () {
+      isUnmounted = false;
       var propListener = typeof propListener === 'undefined' ? null : propListener;
 
       if (propListener == null) {
         propListener = function propListener(newState) {
-          //Only update state if the state has changed
+          //early abort if the component was unmounted or in the process of unmounting
+          if (isUnmounted) {
+            return;
+          } //Only update state if the state has changed
           //Performing a shallow comparison
+
+
           if (!shallowCompare(state, newState)) {
             setState(propSelectFunction(newState, _objectSpread({}, props)));
           }
@@ -166,6 +173,7 @@ function listen(pickerFunc, Component) {
       }
 
       return function () {
+        isUnmounted = true;
         Redux.removeChangeListener(propListener);
       };
     }, []);

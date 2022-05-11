@@ -1,10 +1,10 @@
 {
   "name": "@rybr/redux",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "description": "Simple implementation of redux for use with React and JS",
   "main": "redux.js",
   "scripts": {
-    "test": "node test.js",
+    "test": "node test/test2.js",
     "build": "webpack --config webpack.config.js"
   },
   "repository": {

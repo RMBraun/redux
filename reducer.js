@@ -18,6 +18,8 @@ class Reducer {
       throw new Error('actions must be an object')
     }
 
+    this.initialState = { ...initialState }
+
     this.ID = reduxId
 
     if (this.Redux.getStore(reduxId) == null) {
@@ -39,6 +41,14 @@ class Reducer {
     )
 
     return this
+  }
+
+  reset(newState) {
+    if (this.ID && this.Redux.getStore(this.ID) !== null) {
+      this.Redux.init({
+        [this.ID]: newState || this.initialState,
+      })
+    }
   }
 
   getStore() {

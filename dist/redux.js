@@ -127,8 +127,9 @@ var Redux = /*#__PURE__*/function () {
     _classPrivateFieldSet(this, _EventEmitter, new EE()); //add event listener for actions
 
 
-    _classPrivateFieldGet(this, _EventEmitter).on(EVENTS.ACTION, function (action) {
+    _classPrivateFieldGet(this, _EventEmitter).on(EVENTS.ACTION, function (action, res) {
       action();
+      res();
     });
   }
 
@@ -363,8 +364,10 @@ var Redux = /*#__PURE__*/function () {
           props[_key] = arguments[_key];
         }
 
-        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _EventEmitter).emit(EVENTS.ACTION, function () {
-          return rawAction.apply(void 0, props);
+        return new Promise(function (res) {
+          _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _EventEmitter).emit(EVENTS.ACTION, function () {
+            return rawAction.apply(void 0, props);
+          }, res);
         });
       }; //add prototype toString so that it resolves to the actionId
 

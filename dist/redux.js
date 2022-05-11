@@ -127,9 +127,8 @@ var Redux = /*#__PURE__*/function () {
     _classPrivateFieldSet(this, _EventEmitter, new EE()); //add event listener for actions
 
 
-    _classPrivateFieldGet(this, _EventEmitter).on(EVENTS.ACTION, function (action, res) {
+    _classPrivateFieldGet(this, _EventEmitter).on(EVENTS.ACTION, function (action) {
       action();
-      res();
     });
   }
 
@@ -366,8 +365,9 @@ var Redux = /*#__PURE__*/function () {
 
         return new Promise(function (res) {
           _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _EventEmitter).emit(EVENTS.ACTION, function () {
-            return rawAction.apply(void 0, props);
-          }, res);
+            rawAction.apply(void 0, props);
+            res();
+          });
         });
       }; //add prototype toString so that it resolves to the actionId
 
@@ -444,8 +444,11 @@ var Redux = /*#__PURE__*/function () {
           props[_key2] = arguments[_key2];
         }
 
-        _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _EventEmitter).emit(EVENTS.ACTION, function () {
-          return rawEpic.apply(void 0, props);
+        return new Promise(function (res) {
+          _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _EventEmitter).emit(EVENTS.ACTION, function () {
+            rawEpic.apply(void 0, props);
+            res();
+          });
         });
       }; //add prototype toString so that it resolves to the actionId
 

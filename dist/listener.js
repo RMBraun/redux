@@ -156,16 +156,18 @@ function listen(pickerFunc, Component) {
       var propListener = typeof propListener === 'undefined' ? null : propListener;
 
       if (propListener == null) {
-        propListener = function propListener(newState) {
+        propListener = function propListener(newStore) {
           //early abort if the component was unmounted or in the process of unmounting
           if (isUnmounted) {
             return;
-          } //Only update state if the state has changed
+          } //get new state
+
+
+          var newState = propSelectFunction(newStore, _objectSpread({}, props)); //Only update state if the state has changed
           //Performing a shallow comparison
 
-
           if (!shallowCompare(state, newState)) {
-            setState(propSelectFunction(newState, _objectSpread({}, props)));
+            setState(newState);
           }
         };
 

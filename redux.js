@@ -17,9 +17,8 @@ class Redux {
     this.#EventEmitter = new EE()
 
     //add event listener for actions
-    this.#EventEmitter.on(EVENTS.ACTION, (action, res) => {
+    this.#EventEmitter.on(EVENTS.ACTION, action => {
       action()
-      res()
     })
   }
 
@@ -228,7 +227,10 @@ class Redux {
     }
     const action = function (...props) {
       return new Promise(res => {
-        Redux.#getInstance().#EventEmitter.emit(EVENTS.ACTION, () => rawAction(...props), res)
+        Redux.#getInstance().#EventEmitter.emit(EVENTS.ACTION, () => {
+          rawAction(...props)
+          res()
+        })
       })
     }
 
@@ -285,7 +287,12 @@ class Redux {
     }
 
     const epic = function (...props) {
-      Redux.#getInstance().#EventEmitter.emit(EVENTS.ACTION, () => rawEpic(...props))
+      return new Promise(res => {
+        Redux.#getInstance().#EventEmitter.emit(EVENTS.ACTION, () => {
+          rawEpic(...props)
+          res()
+        })
+      })
     }
 
     //add prototype toString so that it resolves to the actionId

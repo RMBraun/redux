@@ -1,5 +1,4 @@
 const React = require('react')
-const { shallowCompare } = require('./utils')
 
 var Redux
 
@@ -39,11 +38,8 @@ function listen(pickerFunc, Component) {
           //get new state
           const newState = propSelectFunction(newStore, { ...props })
 
-          //Only update state if the state has changed
-          //Performing a shallow comparison
-          if (!shallowCompare(state, newState)) {
-            setState(newState)
-          }
+          //memo should prevent needless re-renders
+          setState(newState)
         }
 
         Redux.addChangeListener(propListener)

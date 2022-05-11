@@ -120,9 +120,6 @@ function _arrayWithHoles(arr) {
 
 var React = __webpack_require__(294);
 
-var _require = __webpack_require__(456),
-    shallowCompare = _require.shallowCompare;
-
 var Redux;
 
 if (typeof window !== 'undefined') {
@@ -163,12 +160,9 @@ function listen(pickerFunc, Component) {
           } //get new state
 
 
-          var newState = propSelectFunction(newStore, _objectSpread({}, props)); //Only update state if the state has changed
-          //Performing a shallow comparison
+          var newState = propSelectFunction(newStore, _objectSpread({}, props)); //memo should prevent needless re-renders
 
-          if (!shallowCompare(state, newState)) {
-            setState(newState);
-          }
+          setState(newState);
         };
 
         Redux.addChangeListener(propListener);
@@ -188,58 +182,6 @@ function listen(pickerFunc, Component) {
 module.exports = {
   bindRedux: bindRedux,
   listen: listen
-};
-
-/***/ }),
-
-/***/ 456:
-/***/ ((module) => {
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function clone(input) {
-  return JSON.parse(JSON.stringify(input));
-} //based off of https://github.com/dashed/shallowequal/blob/master/index.js
-
-
-function shallowCompare(a, b) {
-  if (Object.is(a, b)) {
-    return true;
-  }
-
-  if (_typeof(a) !== 'object' || !a || _typeof(b) !== 'object' || !b) {
-    return false;
-  }
-
-  var aKeys = Object.keys(a);
-  var bKeys = Object.keys(b);
-
-  if (aKeys.length !== bKeys.length) {
-    return false;
-  }
-
-  var isInB = Object.prototype.hasOwnProperty.bind(b);
-  var aKeysLength = aKeys.length;
-  var key;
-
-  for (var i = 0; i < aKeysLength; i++) {
-    key = aKeys[i];
-
-    if (!isInB(key)) {
-      return false;
-    }
-
-    if (!Object.is(a[key], b[key])) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-module.exports = {
-  clone: clone,
-  shallowCompare: shallowCompare
 };
 
 /***/ }),

@@ -7,6 +7,7 @@ class Redux {
   #actionListeners
   #actions
   #epics
+  #reducers
   static #instance
 
   constructor() {
@@ -15,11 +16,34 @@ class Redux {
     this.#actions = {}
     this.#epics = {}
     this.#EventEmitter = new EE()
+    this.#reducers = {}
 
     //add event listener for actions
     this.#EventEmitter.on(EVENTS.ACTION, action => {
       action()
     })
+  }
+
+  static getReducers() {
+    return Redux.#getInstance().#reducers
+  }
+
+  static getReducer(reducerId) {
+    return Redux.#getInstance().#reducers[reducerId]
+  }
+
+  static setReducer(reducer) {
+    if (reducer == null || reducer.ID == null || reducer.constructor.name !== 'Reducer') {
+      throw new Error('Invalid Reducer. Must of type Reducer with a valid non-empty ID attribute')
+    }
+
+    Redux.#getInstance().#reducers[reducer.ID] = reducer
+  }
+
+  static removeReducer(ID) {
+    Redux.#getInstance().#reducers = Object.fromEntries(
+      Object.entries(Redux.#getInstance().#reducers).filter(([key]) => key !== ID)
+    )
   }
 
   static getEventEmitter() {

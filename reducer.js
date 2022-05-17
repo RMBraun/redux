@@ -40,6 +40,8 @@ class Reducer {
       }, {})
     )
 
+    this.Redux.setReducer(this)
+
     return this
   }
 

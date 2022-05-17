@@ -28,6 +28,8 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -39,8 +41,6 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -87,6 +87,8 @@ var _actions = /*#__PURE__*/new WeakMap();
 
 var _epics = /*#__PURE__*/new WeakMap();
 
+var _reducers = /*#__PURE__*/new WeakMap();
+
 var Redux = /*#__PURE__*/function () {
   function Redux() {
     _classCallCheck(this, Redux);
@@ -116,6 +118,11 @@ var Redux = /*#__PURE__*/function () {
       value: void 0
     });
 
+    _reducers.set(this, {
+      writable: true,
+      value: void 0
+    });
+
     _classPrivateFieldSet(this, _store, {});
 
     _classPrivateFieldSet(this, _actionListeners, new Map());
@@ -124,7 +131,9 @@ var Redux = /*#__PURE__*/function () {
 
     _classPrivateFieldSet(this, _epics, {});
 
-    _classPrivateFieldSet(this, _EventEmitter, new EE()); //add event listener for actions
+    _classPrivateFieldSet(this, _EventEmitter, new EE());
+
+    _classPrivateFieldSet(this, _reducers, {}); //add event listener for actions
 
 
     _classPrivateFieldGet(this, _EventEmitter).on(EVENTS.ACTION, function (action) {
@@ -133,6 +142,35 @@ var Redux = /*#__PURE__*/function () {
   }
 
   _createClass(Redux, null, [{
+    key: "getReducers",
+    value: function getReducers() {
+      return _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _reducers);
+    }
+  }, {
+    key: "getReducer",
+    value: function getReducer(reducerId) {
+      return _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _reducers)[reducerId];
+    }
+  }, {
+    key: "setReducer",
+    value: function setReducer(reducer) {
+      if (reducer == null || reducer.ID == null || reducer.constructor.name !== 'Reducer') {
+        throw new Error('Invalid Reducer. Must of type Reducer with a valid non-empty ID attribute');
+      }
+
+      _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _reducers)[reducer.ID] = reducer;
+    }
+  }, {
+    key: "removeReducer",
+    value: function removeReducer(ID) {
+      _classPrivateFieldSet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _reducers, Object.fromEntries(Object.entries(_classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _reducers)).filter(function (_ref) {
+        var _ref2 = _slicedToArray(_ref, 1),
+            key = _ref2[0];
+
+        return key !== ID;
+      })));
+    }
+  }, {
     key: "getEventEmitter",
     value: function getEventEmitter() {
       return _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _EventEmitter);
@@ -231,10 +269,10 @@ var Redux = /*#__PURE__*/function () {
       if (type === Function.name) {
         _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _EventEmitter).addListener(EVENTS.ACTION_LISTENER, changeListener);
       } else if (type === Object.name) {
-        Object.entries(changeListener).forEach(function (_ref) {
-          var _ref2 = _slicedToArray(_ref, 2),
-              key = _ref2[0],
-              callback = _ref2[1];
+        Object.entries(changeListener).forEach(function (_ref3) {
+          var _ref4 = _slicedToArray(_ref3, 2),
+              key = _ref4[0],
+              callback = _ref4[1];
 
           if (callback == null) {
             throw new Error("Action listener for ".concat(key, " cannot be null"));
@@ -288,9 +326,9 @@ var Redux = /*#__PURE__*/function () {
         });
 
         var _actionListenerMapFunc = function _actionListenerMapFunc(info) {
-          formattedChangeListener.forEach(function (_ref3) {
-            var ids = _ref3.ids,
-                callback = _ref3.callback;
+          formattedChangeListener.forEach(function (_ref5) {
+            var ids = _ref5.ids,
+                callback = _ref5.callback;
 
             if (ids.includes(info.id)) {
               callback(info);
@@ -404,10 +442,10 @@ var Redux = /*#__PURE__*/function () {
         throw new Error('actions must be an Object');
       }
 
-      return Object.fromEntries(Object.entries(actions).map(function (_ref4) {
-        var _ref5 = _slicedToArray(_ref4, 2),
-            actionName = _ref5[0],
-            func = _ref5[1];
+      return Object.fromEntries(Object.entries(actions).map(function (_ref6) {
+        var _ref7 = _slicedToArray(_ref6, 2),
+            actionName = _ref7[0],
+            func = _ref7[1];
 
         return [actionName, Redux.createAction(reduxId, func, actionName)];
       }));
@@ -481,10 +519,10 @@ var Redux = /*#__PURE__*/function () {
         throw new Error("You must specify a non-null reduxId when creating redux epics");
       }
 
-      return Object.fromEntries(Object.entries(actions || {}).map(function (_ref6) {
-        var _ref7 = _slicedToArray(_ref6, 2),
-            actionName = _ref7[0],
-            func = _ref7[1];
+      return Object.fromEntries(Object.entries(actions || {}).map(function (_ref8) {
+        var _ref9 = _slicedToArray(_ref8, 2),
+            actionName = _ref9[0],
+            func = _ref9[1];
 
         return [actionName, Redux.createEpic(reduxId, func, actionName)];
       }));
@@ -492,9 +530,9 @@ var Redux = /*#__PURE__*/function () {
   }, {
     key: "callAction",
     value: function callAction(reduxId, actionId, payload) {
-      var _ref8 = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {},
-          _ref8$isDelayed = _ref8.isDelayed,
-          isDelayed = _ref8$isDelayed === void 0 ? false : _ref8$isDelayed;
+      var _ref10 = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {},
+          _ref10$isDelayed = _ref10.isDelayed,
+          isDelayed = _ref10$isDelayed === void 0 ? false : _ref10$isDelayed;
 
       var allActions = _classPrivateFieldGet(_classStaticPrivateMethodGet(Redux, Redux, _getInstance).call(Redux), _actions);
 

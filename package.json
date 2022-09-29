@@ -1,6 +1,6 @@
 {
   "name": "@rybr/redux",
-  "version": "2.3.5",
+  "version": "2.3.6",
   "description": "Simple state management Flux system for use with React and NodeJS",
   "main": "redux.js",
   "scripts": {

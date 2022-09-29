@@ -2,8 +2,11 @@
 Simplified Redux like Flux implementation for React.  
 Works in both NodeJs and client side JS (React).  
 Works natively out of the box with NextJs.  
-</br>
-</br>
+  
+  
+`redux.min.js` is only 30kb
+  
+  
 Uses `Immer` to enforce store immutability.  
 Uses `React` combined with `React.memo` to only trigger updates when specified store values have changed.
   

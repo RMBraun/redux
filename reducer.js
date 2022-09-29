@@ -1,5 +1,3 @@
-const { get, keys, reduce } = require('@rybr/lenses')
-
 class Reducer {
   constructor(newRedux) {
     if (newRedux) {
@@ -30,15 +28,13 @@ class Reducer {
 
     this.Actions = this.Redux.getActions(reduxId) || this.Redux.createActions(reduxId, actions)
 
-    this.DelayedActions = get(
-      this.Actions,
-      keys(),
-      reduce((acc, actionId) => {
+    this.DelayedActions =
+      this.Actions &&
+      Object.keys(this.Actions).reduce((acc, actionId) => {
         acc[actionId] = payload => this.Redux.chainAction(reduxId, actionId, payload)
 
         return acc
       }, {})
-    )
 
     this.Redux.setReducer(this)
 
